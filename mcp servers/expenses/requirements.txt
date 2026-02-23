@@ -1,3 +1,0 @@
-sqlmodel
-psycopg2-binary 
-mcp
