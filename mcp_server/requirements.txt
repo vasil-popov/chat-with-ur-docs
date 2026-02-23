@@ -1,0 +1,6 @@
+sqlmodel
+psycopg2-binary 
+mcp
+starlette
+uvicorn
+fastapi

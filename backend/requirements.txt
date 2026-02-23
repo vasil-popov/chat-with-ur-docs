@@ -1,1 +1,4 @@
 fastapi
+langchain-google-genai
+langchain-mcp-adapters
+langgraph
