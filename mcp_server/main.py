@@ -1,5 +1,5 @@
 # mcp_server/main.py
-from fastapi import FastAPI
+# from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
 import uvicorn
 
@@ -17,7 +17,7 @@ from exercises.tools import (
     execute_get_workout_summary
 )
 
-app = FastAPI(title="Life OS Tool Engine")
+# app = FastAPI(title="Life OS Tool Engine")
 mcp = FastMCP("Life_OS_Tools")
 
 # Expense tools
@@ -32,7 +32,7 @@ mcp.add_tool(execute_get_workouts, name="get_workouts")
 mcp.add_tool(execute_delete_exercise, name="delete_exercise")
 mcp.add_tool(execute_get_workout_summary, name="get_workout_summary")
 
-app.mount("/mcp", mcp.sse_app())
+# app.mount("/mcp", mcp.sse_app())
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="localhost", port=8001)
