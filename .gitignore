@@ -1,14 +1,14 @@
 .env
 venv
 __pycache__
-frontend
-
+.vscode
 
 # Expo
 .expo
 __generated__
 web-build
 bare-apps
+expo-env.d.ts
 
 # macOS
 .DS_Store
