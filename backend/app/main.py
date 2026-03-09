@@ -8,8 +8,19 @@ from datetime import date
 import asyncio
 import os
 import logging
-from backend.app.deps.dependency_container import di_container_instance
-from backend.app.deps.dependency_factory import get_llm_client, get_mcp_client
+from app.deps.dependency_container import di_container_instance
+from app.deps.dependency_factory import get_llm_client, get_mcp_client
+
+import logging
+import sys
+
+# Configure logging to write to stdout immediately
+logging.basicConfig(
+    stream=sys.stdout, 
+    level=logging.DEBUG
+)
+
+load_dotenv("../.env")
 
 #imports
 #MLFLOW tracing
@@ -26,7 +37,6 @@ async def lifespan(app: FastAPI):
     #app.state.var_name
     #yield
     #shutdown process started dispose of db engine etc
-    load_dotenv("../.env")
 
     logging.info("Starting LangChain Orchestrator...")
     logging.info("Connecting to Finance MCP Server...")
@@ -48,9 +58,14 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan, title="Life OS LangChain Backend")
 
+    @app.get("/healthz", tags=["health"])
+    async def health() -> dict[str, str]: 
+        return {"status": "ok"}
+
     try:
+        
         from app.api.router import api_router
-        app.include_router(api_router)
+        app.include_router(api_router, prefix="/api")
         app.add_middleware(
             CORSMiddleware,
             allow_origins=["http://localhost:3000"], # Your Next.js URL
@@ -61,4 +76,6 @@ def create_app() -> FastAPI:
     except Exception as e:
         logging.warning("Api router not loaded: %s", e)
 
+    return app
 
+app = create_app()

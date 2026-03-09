@@ -4,3 +4,4 @@ mcp
 starlette
 uvicorn
 fastapi
+fastmcp

@@ -51,7 +51,7 @@ async def main():
     response = await agent.ainvoke({"messages": [("user", prompt)]})
     
     # 6. Print the entire conversation history
-    for msg in response["messages"]:
+    for msg in response["messages"][]:
         msg.pretty_print()
 
 if __name__ == "__main__":
