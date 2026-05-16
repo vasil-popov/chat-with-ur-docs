@@ -4,3 +4,5 @@ pydantic
 langgraph
 langchain-google-genai
 langchain-mcp-adapters
+sqlmodel
+psycopg2-binary

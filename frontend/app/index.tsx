@@ -1,92 +1,104 @@
-// app/index.tsx
-import { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Markdown from 'react-native-markdown-display';
 import { sendChatMessage } from '../src/api';
+import { useTheme, type ThemeColors } from '../src/theme';
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
-  metadata?: {
-    tools_executed: string[];
-  };
+  metadata?: { tools_executed: string[] };
 };
 
 export default function ChatScreen() {
+  const { theme } = useTheme();
+  const c = theme.colors;
+  const styles = useMemo(() => makeStyles(c), [theme]);
+  const mdStyles = useMemo(() => makeMdStyles(c), [theme]);
+
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
-
-    // 1. Add user message to UI immediately
     const userMessage: Message = { role: 'user', content: inputText };
     const newHistory = [...messages, userMessage];
     setMessages(newHistory);
     setInputText('');
     setIsLoading(true);
-
-    // 2. Send the entire history to your LangChain backend
     const aiResponse = await sendChatMessage(inputText);
-
-    // 3. Add AI response to UI
     setMessages([...newHistory, aiResponse as Message]);
     setIsLoading(false);
   };
 
   return (
-    // 1. KeyboardAvoidingView is now the ABSOLUTE ROOT
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#f5f5f5' }}
+      style={{ flex: 1, backgroundColor: c.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} // Accounts for iOS header/notch
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
     >
-      {/* 2. SafeAreaView goes INSIDE the keyboard view */}
       <SafeAreaView style={{ flex: 1 }} edges={['bottom', 'left', 'right']}>
-        
-        {/* Chat History Area */}
-        <ScrollView 
-          style={styles.chatArea} 
-          contentContainerStyle={{ padding: 20, flexGrow: 1 }} // flexGrow ensures messages push up
-          keyboardShouldPersistTaps="handled" // Lets users tap buttons without dismissing keyboard
+
+        <ScrollView
+          style={styles.chatArea}
+          contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
         >
-          {messages.map((msg, index) => (<View key={index} style={[styles.messageBubble, msg.role === 'user' ? styles.userBubble : styles.aiBubble]}>
-            
-            {/* If it's the user, render normal text. If it's the AI, render Markdown! */}
-            {msg.role === 'user' ? (
-              <Text style={styles.userText}>{msg.content}</Text>
-            ) : (
-              <Markdown style={markdownStyles}>
-                {msg.content}
-              </Markdown>
-            )}
-            
-            {/* Your awesome Tool Badge stays right here */}
-            {msg.metadata && msg.metadata.tools_executed && msg.metadata.tools_executed.length > 0 && (
-              <View style={styles.toolBadge}>
-                <Text style={styles.toolBadgeText}>
-                  ⚙️ Used: {msg.metadata.tools_executed.join(', ')}
-                </Text>
-              </View>
+          {messages.map((msg, i) => (
+            <View
+              key={i}
+              style={[
+                styles.bubble,
+                msg.role === 'user' ? styles.userBubble : styles.aiBubble,
+              ]}
+            >
+              {msg.role === 'user' ? (
+                <Text style={styles.userText}>{msg.content}</Text>
+              ) : (
+                <Markdown style={mdStyles}>{msg.content}</Markdown>
+              )}
+              {msg.metadata && msg.metadata.tools_executed.length > 0 && (
+                <View style={styles.toolBadge}>
+                  <Text style={styles.toolBadgeText}>
+                    ⚙️ {msg.metadata.tools_executed.join(', ')}
+                  </Text>
+                </View>
               )}
             </View>
-            ))}
-
+          ))}
+          {isLoading && (
+            <View style={[styles.bubble, styles.aiBubble]}>
+              <ActivityIndicator color={c.textMuted} />
+            </View>
+          )}
         </ScrollView>
 
-        {/* Input Area */}
         <View style={styles.inputArea}>
           <TextInput
-             // ... your existing text input ...
-             style={styles.input}
-             value={inputText}
-             onChangeText={setInputText}
-             placeholder="Log a workout..."
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Message..."
+            placeholderTextColor={c.placeholder}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-            <Text style={styles.sendButtonText}>Send</Text>
+          <TouchableOpacity
+            style={[styles.sendBtn, !inputText.trim() && styles.sendBtnDisabled]}
+            onPress={handleSend}
+            disabled={!inputText.trim()}
+          >
+            <Text style={styles.sendBtnText}>Send</Text>
           </TouchableOpacity>
         </View>
 
@@ -95,59 +107,83 @@ export default function ChatScreen() {
   );
 }
 
-// Basic styling that works on both Web and Mobile
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  chatArea: { flex: 1 },
-  messageBubble: { padding: 15, borderRadius: 20, marginBottom: 10, maxWidth: '80%' },
-  userBubble: { backgroundColor: '#007AFF', alignSelf: 'flex-end', borderBottomRightRadius: 5 },
-  aiBubble: { backgroundColor: '#E5E5EA', alignSelf: 'flex-start', borderBottomLeftRadius: 5 },
-  userText: { color: 'white', fontSize: 16 },
-  aiText: { color: 'black', fontSize: 16 },
-  inputArea: { flexDirection: 'row', padding: 15, backgroundColor: 'white', borderTopWidth: 1, borderColor: '#ddd' },
-  input: { flex: 1, backgroundColor: '#f0f0f0', borderRadius: 25, paddingHorizontal: 20, fontSize: 16, marginRight: 10, height: 50 },
-  sendButton: { backgroundColor: '#007AFF', borderRadius: 25, justifyContent: 'center', paddingHorizontal: 20, height: 50 },
-  sendButtonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
-  // Add these to your StyleSheet.create({})
-  toolBadge: {
-    marginTop: 8,
-    backgroundColor: '#D1E8FF', // A nice soft blue
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  toolBadgeText: {
-    fontSize: 12,
-    color: '#004A99',
-    fontWeight: '600',
-  },
-});
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    chatArea: { flex: 1 },
+    bubble: {
+      padding: 14,
+      borderRadius: 20,
+      marginBottom: 10,
+      maxWidth: '82%',
+    },
+    userBubble: {
+      backgroundColor: c.userBubble,
+      alignSelf: 'flex-end',
+      borderBottomRightRadius: 4,
+    },
+    aiBubble: {
+      backgroundColor: c.aiBubble,
+      alignSelf: 'flex-start',
+      borderBottomLeftRadius: 4,
+    },
+    userText: { color: '#ffffff', fontSize: 16 },
+    toolBadge: {
+      marginTop: 8,
+      backgroundColor: c.drawerActiveBg,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 12,
+      alignSelf: 'flex-start',
+    },
+    toolBadgeText: { fontSize: 12, color: c.accent, fontWeight: '600' },
+    inputArea: {
+      flexDirection: 'row',
+      padding: 12,
+      backgroundColor: c.surface,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      gap: 10,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: c.inputBg,
+      borderRadius: 22,
+      paddingHorizontal: 18,
+      fontSize: 16,
+      height: 46,
+      color: c.text,
+    },
+    sendBtn: {
+      backgroundColor: c.accent,
+      borderRadius: 22,
+      justifyContent: 'center',
+      paddingHorizontal: 20,
+      height: 46,
+    },
+    sendBtnDisabled: { opacity: 0.45 },
+    sendBtnText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  });
+}
 
-// Custom styles just for the Markdown parser
-const markdownStyles = StyleSheet.create({
-  body: {
-    color: 'black',
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  strong: {
-    fontWeight: 'bold',
-  },
-  em: {
-    fontStyle: 'italic',
-  },
-  bullet_list: {
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  list_item: {
-    marginVertical: 2,
-  },
-  code_inline: {
-    backgroundColor: '#d1d1d6',
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    fontFamily: 'monospace',
-  },
-});
+function makeMdStyles(c: ThemeColors) {
+  return {
+    body: { color: c.aiBubbleText, fontSize: 16, lineHeight: 24 },
+    strong: { fontWeight: 'bold' as const },
+    em: { fontStyle: 'italic' as const },
+    bullet_list: { marginTop: 4, marginBottom: 4 },
+    list_item: { marginVertical: 2 },
+    code_inline: {
+      backgroundColor: c.surfaceVariant,
+      borderRadius: 4,
+      paddingHorizontal: 5,
+      fontFamily: 'monospace',
+      color: c.text,
+    },
+    fence: {
+      backgroundColor: c.surfaceVariant,
+      borderRadius: 6,
+      padding: 10,
+      color: c.text,
+    },
+  };
+}

@@ -68,8 +68,8 @@ def create_app() -> FastAPI:
         app.include_router(api_router, prefix="/api")
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=["http://localhost:3000"], # Your Next.js URL
-            allow_credentials=True,
+            allow_origins=["*"],
+            allow_credentials=False,
             allow_methods=["*"],
             allow_headers=["*"],
         )
