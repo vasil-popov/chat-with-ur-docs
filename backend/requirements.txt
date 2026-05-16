@@ -4,5 +4,12 @@ pydantic
 langgraph
 langchain-google-genai
 langchain-mcp-adapters
+langchain-community
 sqlmodel
 psycopg2-binary
+pgvector
+python-multipart
+PyMuPDF
+openpyxl
+pillow
+python-dotenv

@@ -112,3 +112,20 @@ def delete_expense(expense_id: str, db: Session = Depends(get_session)):
 
     db.delete(expense)
     db.commit()
+
+
+@router.post("/bulk", response_model=List[ExpenseOut], status_code=201)
+def bulk_create_expenses(items: List[ExpenseCreate], db: Session = Depends(get_session)):
+    created = []
+    for data in items:
+        expense = Expense(
+            amount=data.amount,
+            category=data.category,
+            description=data.description,
+            transaction_date=date.fromisoformat(data.transaction_date),
+        )
+        db.add(expense)
+        db.flush()
+        created.append(_to_out(expense))
+    db.commit()
+    return created

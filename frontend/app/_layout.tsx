@@ -79,6 +79,15 @@ function ThemedDrawer() {
             ),
           }}
         />
+        <Drawer.Screen
+          name="files"
+          options={{
+            title: 'Files',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="document-text-outline" size={size} color={color} />
+            ),
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

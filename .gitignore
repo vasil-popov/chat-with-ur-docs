@@ -2,6 +2,7 @@
 venv
 __pycache__
 .vscode
+uploads
 
 # Expo
 .expo
@@ -9,6 +10,7 @@ __generated__
 web-build
 bare-apps
 expo-env.d.ts
+
 
 # macOS
 .DS_Store

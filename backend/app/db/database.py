@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field, Session, create_engine
@@ -43,6 +43,23 @@ class ExerciseLog(SQLModel, table=True):
     reps: Optional[int] = Field(default=None)
     weight_kg: Optional[float] = Field(default=None)
     distance_km: Optional[float] = Field(default=None)
+
+
+class UploadedFile(SQLModel, table=True):
+    __tablename__ = "uploaded_files"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    original_name: str = Field(max_length=255)
+    file_path: str = Field(max_length=512)
+    file_type: str = Field(max_length=20)   # 'image'|'pdf'|'txt'|'excel'
+    mime_type: str = Field(max_length=100)
+    category: str = Field(default="general", max_length=50)
+    size_bytes: int
+    status: str = Field(default="processing")  # 'processing'|'ready'|'error'
+    extracted_text: Optional[str] = Field(default=None)
+    error_message: Optional[str] = Field(default=None)
+    is_receipt: bool = Field(default=False)
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+    processed_at: Optional[datetime] = Field(default=None)
 
 
 def get_session():
