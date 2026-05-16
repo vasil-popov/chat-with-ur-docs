@@ -1,0 +1,1 @@
+fastmcp run main.py

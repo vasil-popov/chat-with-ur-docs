@@ -2,7 +2,7 @@
 import { Platform } from 'react-native';
 
 // Dynamically set the API URL based on the platform
-const API_BASE_URL = 'http://192.168.1.22:8069'
+const API_BASE_URL = 'http://192.168.1.10:8069'
 
 // This is the function our chat UI will call
 export const sendChatMessage = async (userMessage: string) => {

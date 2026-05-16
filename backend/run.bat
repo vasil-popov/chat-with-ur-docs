@@ -1,0 +1,1 @@
+py -m uvicorn --env-file .env --host 0.0.0.0 --port 8069 app.main:app
