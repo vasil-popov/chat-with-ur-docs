@@ -49,13 +49,13 @@ export default function ReceiptProposalCard({ items, onConfirmed }: Props) {
             <Text style={[styles.desc, { color: c.text }]}>{item.description}</Text>
             <Text style={[styles.cat, { color: c.textMuted }]}>{item.category}</Text>
           </View>
-          <Text style={[styles.amount, { color: c.textSecondary }]}>${item.amount.toFixed(2)}</Text>
+          <Text style={[styles.amount, { color: c.textSecondary }]}>€{item.amount.toFixed(2)}</Text>
         </View>
       ))}
 
       <View style={[styles.totalRow, { borderTopColor: c.border }]}>
         <Text style={[styles.totalLabel, { color: c.textMuted }]}>Total</Text>
-        <Text style={[styles.totalAmount, { color: c.accent }]}>${total.toFixed(2)}</Text>
+        <Text style={[styles.totalAmount, { color: c.accent }]}>€{total.toFixed(2)}</Text>
       </View>
 
       <TouchableOpacity

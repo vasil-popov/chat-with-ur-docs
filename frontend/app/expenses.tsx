@@ -115,7 +115,7 @@ export default function ExpensesScreen() {
 
         <View style={styles.totalBar}>
           <Text style={styles.totalLabel}>Total ({expenses.length} items)</Text>
-          <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
+          <Text style={styles.totalAmount}>€{total.toFixed(2)}</Text>
         </View>
 
         {loading ? (
@@ -133,7 +133,7 @@ export default function ExpensesScreen() {
                   <Text style={styles.rowDate}>{item.date}</Text>
                   {item.description ? <Text style={styles.rowDesc}>{item.description}</Text> : null}
                 </View>
-                <Text style={styles.rowAmount}>${item.amount.toFixed(2)}</Text>
+                <Text style={styles.rowAmount}>€{item.amount.toFixed(2)}</Text>
                 <TouchableOpacity onPress={() => openEdit(item)} style={styles.iconBtn}>
                   <Text style={styles.icon}>✏️</Text>
                 </TouchableOpacity>

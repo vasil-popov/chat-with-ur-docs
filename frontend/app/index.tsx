@@ -16,7 +16,7 @@ import Markdown from 'react-native-markdown-display';
 import { useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { sendChatMessage, uploadFile, type ReceiptItem } from '../src/api';
+import { sendChatMessageStream, uploadFile, type ReceiptItem } from '../src/api';
 import { useTheme, type ThemeColors } from '../src/theme';
 import FileContextBar from '../src/components/FileContextBar';
 import ReceiptProposalCard from '../src/components/ReceiptProposalCard';
@@ -39,6 +39,7 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingTools, setLoadingTools] = useState<string[]>([]);
   const [activeFileIds, setActiveFileIds] = useState<string[]>([]);
   const [activeFileNames, setActiveFileNames] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -53,18 +54,36 @@ export default function ChatScreen() {
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, loadingTools]);
 
   const handleSend = async () => {
-    if (!inputText.trim()) return;
-    const userMessage: Message = { role: 'user', content: inputText };
-    const newHistory = [...messages, userMessage];
+    if (!inputText.trim() || isLoading) return;
+
+    const userMsg: Message = { role: 'user', content: inputText };
+    const newHistory = [...messages, userMsg];
     setMessages(newHistory);
     setInputText('');
     setIsLoading(true);
-    const aiResponse = await sendChatMessage(inputText, { file_ids: activeFileIds.length ? activeFileIds : undefined });
-    setMessages([...newHistory, aiResponse as Message]);
-    setIsLoading(false);
+    setLoadingTools([]);
+
+    await sendChatMessageStream(
+      inputText,
+      { file_ids: activeFileIds.length ? activeFileIds : undefined },
+      {
+        onTool: (name) =>
+          setLoadingTools((prev) => (prev.includes(name) ? prev : [...prev, name])),
+        onDone: (content, tools) => {
+          setMessages([...newHistory, { role: 'assistant', content, metadata: { tools_executed: tools } }]);
+          setIsLoading(false);
+          setLoadingTools([]);
+        },
+        onError: (err) => {
+          setMessages([...newHistory, { role: 'assistant', content: `Error: ${err}`, metadata: { tools_executed: [] } }]);
+          setIsLoading(false);
+          setLoadingTools([]);
+        },
+      },
+    );
   };
 
   const handleAttach = () => {
@@ -82,6 +101,16 @@ export default function ChatScreen() {
       const uploaded = await uploadFile(uri, name, mimeType);
       setActiveFileIds((prev) => [...prev, uploaded.id]);
       setActiveFileNames((prev) => [...prev, uploaded.original_name]);
+
+      // If a receipt was detected, inject the proposal card immediately as an AI message
+      if (uploaded.is_receipt && uploaded.receipt_proposal?.length) {
+        const proposalMsg: Message = {
+          role: 'assistant',
+          content: `Receipt detected in **${uploaded.original_name}**. Review the items below and confirm to log them as expenses.`,
+          metadata: { tools_executed: [], receipt_proposal: uploaded.receipt_proposal },
+        };
+        setMessages((prev) => [...prev, proposalMsg]);
+      }
     } catch {
       Alert.alert('Error', 'Upload failed.');
     } finally {
@@ -94,8 +123,8 @@ export default function ChatScreen() {
     if (status !== 'granted') { Alert.alert('Permission needed', 'Allow camera access.'); return; }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
     if (result.canceled || !result.assets?.[0]) return;
-    const asset = result.assets[0];
-    await _upload(asset.uri, asset.fileName ?? `photo_${Date.now()}.jpg`, asset.mimeType ?? 'image/jpeg');
+    const a = result.assets[0];
+    await _upload(a.uri, a.fileName ?? `photo_${Date.now()}.jpg`, a.mimeType ?? 'image/jpeg');
   };
 
   const attachFromLibrary = async () => {
@@ -103,8 +132,8 @@ export default function ChatScreen() {
     if (status !== 'granted') { Alert.alert('Permission needed', 'Allow photo library access.'); return; }
     const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.8 });
     if (result.canceled || !result.assets?.[0]) return;
-    const asset = result.assets[0];
-    await _upload(asset.uri, asset.fileName ?? `photo_${Date.now()}.jpg`, asset.mimeType ?? 'image/jpeg');
+    const a = result.assets[0];
+    await _upload(a.uri, a.fileName ?? `photo_${Date.now()}.jpg`, a.mimeType ?? 'image/jpeg');
   };
 
   const attachDocument = async () => {
@@ -115,8 +144,8 @@ export default function ChatScreen() {
       copyToCacheDirectory: true,
     });
     if (result.canceled || !result.assets?.[0]) return;
-    const asset = result.assets[0];
-    await _upload(asset.uri, asset.name, asset.mimeType ?? 'application/octet-stream');
+    const a = result.assets[0];
+    await _upload(a.uri, a.name, a.mimeType ?? 'application/octet-stream');
   };
 
   const removeFile = (id: string) => {
@@ -140,10 +169,7 @@ export default function ChatScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {messages.map((msg, i) => (
-            <View
-              key={i}
-              style={[styles.bubble, msg.role === 'user' ? styles.userBubble : styles.aiBubble]}
-            >
+            <View key={i} style={[styles.bubble, msg.role === 'user' ? styles.userBubble : styles.aiBubble]}>
               {msg.role === 'user' ? (
                 <Text style={styles.userText}>{msg.content}</Text>
               ) : (
@@ -157,16 +183,19 @@ export default function ChatScreen() {
               )}
               {msg.metadata && msg.metadata.tools_executed.length > 0 && (
                 <View style={styles.toolBadge}>
-                  <Text style={styles.toolBadgeText}>
-                    ⚙️ {msg.metadata.tools_executed.join(', ')}
-                  </Text>
+                  <Text style={styles.toolBadgeText}>⚙️ {msg.metadata.tools_executed.join(', ')}</Text>
                 </View>
               )}
             </View>
           ))}
+
+          {/* Loading bubble — shows tool names as they stream in */}
           {isLoading && (
-            <View style={[styles.bubble, styles.aiBubble]}>
+            <View style={[styles.bubble, styles.aiBubble, styles.loadingBubble]}>
               <ActivityIndicator color={c.textMuted} />
+              {loadingTools.length > 0 && (
+                <Text style={styles.loadingToolText}>⚙️ {loadingTools.join(' · ')}</Text>
+              )}
             </View>
           )}
         </ScrollView>
@@ -186,7 +215,7 @@ export default function ChatScreen() {
           >
             {uploading
               ? <ActivityIndicator size="small" color={c.accent} />
-              : <Text style={[styles.attachIcon, { color: c.accent }]}>📎</Text>}
+              : <Text style={styles.attachIcon}>📎</Text>}
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -195,11 +224,12 @@ export default function ChatScreen() {
             placeholder="Message..."
             placeholderTextColor={c.placeholder}
             multiline
+            onSubmitEditing={handleSend}
           />
           <TouchableOpacity
-            style={[styles.sendBtn, !inputText.trim() && styles.sendBtnDisabled]}
+            style={[styles.sendBtn, (!inputText.trim() || isLoading) && styles.sendBtnDisabled]}
             onPress={handleSend}
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || isLoading}
           >
             <Text style={styles.sendBtnText}>Send</Text>
           </TouchableOpacity>
@@ -219,9 +249,11 @@ function makeStyles(c: ThemeColors) {
     userText: { color: '#ffffff', fontSize: 16 },
     toolBadge: { marginTop: 8, backgroundColor: c.drawerActiveBg, paddingVertical: 4, paddingHorizontal: 8, borderRadius: 12, alignSelf: 'flex-start' },
     toolBadgeText: { fontSize: 12, color: c.accent, fontWeight: '600' },
+    loadingBubble: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    loadingToolText: { fontSize: 12, color: c.accent, fontWeight: '600', flexShrink: 1 },
     inputArea: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: c.surface, borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.border, gap: 8 },
     attachBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-    attachIcon: { fontSize: 22 },
+    attachIcon: { fontSize: 22, color: '#007aff' },
     input: { flex: 1, backgroundColor: c.inputBg, borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10, fontSize: 16, color: c.text, maxHeight: 120 },
     sendBtn: { backgroundColor: c.accent, borderRadius: 22, justifyContent: 'center', paddingHorizontal: 18, height: 44 },
     sendBtnDisabled: { opacity: 0.45 },

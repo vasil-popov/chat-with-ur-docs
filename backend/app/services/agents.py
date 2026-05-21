@@ -24,6 +24,15 @@ Use the available tools to search through uploaded documents and answer question
 Only answer questions about document content — do NOT log expenses or workouts.
 Cite the source document when you answer. Today's date: {today}."""
 
+GENERAL_SYSTEM_PROMPT = """You are a friendly, helpful general assistant.
+Handle general knowledge questions, chitchat, follow-up clarifications, and anything that is not related to
+expense/workout tracking or the content of uploaded documents.
+
+Do NOT attempt to log expenses, log workouts, or search uploaded documents yourself. If the user clearly asks
+for one of those, briefly let them know you'll hand it off to the appropriate specialist and keep your reply short.
+
+Be concise, conversational, and accurate. Today's date: {today}."""
+
 SUPERVISOR_SYSTEM_PROMPT = """You are a routing supervisor. Decide which specialist to invoke next.
 
 Specialists:
@@ -31,19 +40,22 @@ Specialists:
   Use for: "log this", "add expense", "record my workout", "groceries cost X", "I spent X on Y", receipt items that need to be saved.
 - "rag": questions about the CONTENT of uploaded files/documents (what does the document say, summarise file, search notes).
   Do NOT use for logging or saving data.
+- "general": general knowledge questions, chitchat, greetings, follow-up clarifications, and anything not covered by tracking or rag.
+  Use for: small talk, definitions, explanations unrelated to the user's tracked data or uploaded documents.
 - "FINISH": the last assistant message already answered the user fully — no more work needed.
 
-Rules:
-- If the last message in the conversation is a complete assistant answer, respond FINISH.
+Rules (evaluated in order):
 - If the user wants to save/log something (even from a receipt), respond tracking.
 - If the user asks a question about file contents, respond rag.
+- If the last assistant message already fully answers the user's current request, respond FINISH.
+- Otherwise respond general.
 - Never route to the same agent twice in a row for the same request.
 
-Respond with exactly one word: tracking, rag, or FINISH."""
+Respond with exactly one word: tracking, rag, general, or FINISH."""
 
 
 class RouteDecision(BaseModel):
-    next: Literal["tracking", "rag", "FINISH"]
+    next: Literal["tracking", "rag", "general", "FINISH"]
 
 
 def _last_human_message(state: MessagesState) -> list:
@@ -52,6 +64,20 @@ def _last_human_message(state: MessagesState) -> list:
         if isinstance(msg, HumanMessage):
             return [msg]
     return state["messages"][-1:]
+
+
+def _clean_messages_for_general(msgs: list) -> list:
+    """Strip AIMessages with tool_calls and their ToolMessages to prevent validation errors."""
+    from langchain_core.messages import ToolMessage
+    tool_call_ids: set[str] = set()
+    for m in msgs:
+        if isinstance(m, AIMessage) and m.tool_calls:
+            tool_call_ids.update(tc["id"] for tc in m.tool_calls)
+    return [
+        m for m in msgs
+        if not (isinstance(m, AIMessage) and m.tool_calls)
+        and not (isinstance(m, ToolMessage) and m.tool_call_id in tool_call_ids)
+    ]
 
 
 def build_graph(llm, mcp_tools: list, rag_tools: list):
@@ -67,6 +93,12 @@ def build_graph(llm, mcp_tools: list, rag_tools: list):
         llm,
         rag_tools,
         prompt=SystemMessage(content=RAG_SYSTEM_PROMPT.format(today=today)),
+    )
+
+    general_agent = create_react_agent(
+        llm,
+        [],
+        prompt=SystemMessage(content=GENERAL_SYSTEM_PROMPT.format(today=today)),
     )
 
     router_llm = llm.with_structured_output(RouteDecision)
@@ -106,11 +138,23 @@ def build_graph(llm, mcp_tools: list, rag_tools: list):
             new_messages = [AIMessage(content=f"I encountered an error searching documents: {e}")]
         return Command(goto="supervisor", update={"messages": new_messages})
 
+    async def call_general_agent(state: MessagesState) -> Command:
+        # Pass the last few messages so follow-ups and chitchat have conversational context
+        sub_state = {"messages": _clean_messages_for_general(state["messages"][-6:])}
+        try:
+            result = await general_agent.ainvoke(sub_state)
+            new_messages = [m for m in result["messages"] if isinstance(m, AIMessage)][-1:]
+        except Exception as e:
+            logger.error("GeneralAgent error: %s", e)
+            new_messages = [AIMessage(content=f"I encountered an error with the general assistant: {e}")]
+        return Command(goto="supervisor", update={"messages": new_messages})
+
     graph = (
         StateGraph(MessagesState)
         .add_node("supervisor", supervisor_node)
         .add_node("tracking", call_tracking_agent)
         .add_node("rag", call_rag_agent)
+        .add_node("general", call_general_agent)
         .add_edge(START, "supervisor")
         .compile()
     )

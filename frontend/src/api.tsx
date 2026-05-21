@@ -1,25 +1,60 @@
-const API_BASE_URL = 'http://192.168.1.10:8069';
+const API_BASE_URL = 'http://192.168.1.28:8069';
 
 // ─── Chat ────────────────────────────────────────────────────────────────────
 
-export const sendChatMessage = async (
+export type StreamCallbacks = {
+  onTool: (name: string) => void;
+  onDone: (content: string, tools: string[]) => void;
+  onError: (message: string) => void;
+};
+
+export const sendChatMessageStream = (
   userMessage: string,
-  options?: { file_ids?: string[] }
-) => {
-  try {
-    const body: Record<string, unknown> = { message: userMessage };
-    if (options?.file_ids?.length) body.file_ids = options.file_ids;
-    const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) throw new Error('Network response was not ok');
-    return await response.json();
-  } catch (error) {
-    console.error('API Error:', error);
-    return { role: 'assistant', content: "Sorry, I couldn't reach the server.", metadata: { tools_executed: [] } };
-  }
+  options: { file_ids?: string[] },
+  callbacks: StreamCallbacks,
+): Promise<void> => {
+  const body: Record<string, unknown> = { message: userMessage };
+  if (options.file_ids?.length) body.file_ids = options.file_ids;
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}/api/chat/stream`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    let consumed = 0;
+
+    const processChunk = (text: string) => {
+      const lines = text.split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const data = JSON.parse(line.slice(6));
+          if (data.type === 'tool') callbacks.onTool(data.name);
+          else if (data.type === 'done') callbacks.onDone(data.content ?? '', data.tools ?? []);
+          else if (data.type === 'error') callbacks.onError(data.content ?? 'Unknown error');
+        } catch { /* skip malformed line */ }
+      }
+    };
+
+    xhr.onprogress = () => {
+      const newText = xhr.responseText.slice(consumed);
+      consumed = xhr.responseText.length;
+      processChunk(newText);
+    };
+
+    xhr.onload = () => {
+      // Flush any remaining bytes not caught by onprogress
+      const remaining = xhr.responseText.slice(consumed);
+      if (remaining) processChunk(remaining);
+      resolve();
+    };
+
+    xhr.onerror = () => { callbacks.onError('Network error'); resolve(); };
+    xhr.ontimeout = () => { callbacks.onError('Request timed out'); resolve(); };
+    xhr.timeout = 120000;
+
+    xhr.send(JSON.stringify(body));
+  });
 };
 
 // ─── Expenses ─────────────────────────────────────────────────────────────────
