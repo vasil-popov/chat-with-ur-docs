@@ -16,6 +16,7 @@ import Markdown from 'react-native-markdown-display';
 import { useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { sendChatMessageStream, uploadFile, type ReceiptItem } from '../src/api';
 import { useTheme, type ThemeColors } from '../src/theme';
 import FileContextBar from '../src/components/FileContextBar';
@@ -44,7 +45,6 @@ export default function ChatScreen() {
   const [activeFileNames, setActiveFileNames] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  // Accept fileId from Files screen "Ask about this"
   useEffect(() => {
     if (params.fileId && !activeFileIds.includes(params.fileId)) {
       setActiveFileIds((prev) => [...prev, params.fileId!]);
@@ -102,7 +102,6 @@ export default function ChatScreen() {
       setActiveFileIds((prev) => [...prev, uploaded.id]);
       setActiveFileNames((prev) => [...prev, uploaded.original_name]);
 
-      // If a receipt was detected, inject the proposal card immediately as an AI message
       if (uploaded.is_receipt && uploaded.receipt_proposal?.length) {
         const proposalMsg: Message = {
           role: 'assistant',
@@ -154,6 +153,8 @@ export default function ChatScreen() {
     setActiveFileNames((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const canSend = inputText.trim().length > 0 && !isLoading;
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: c.background }}
@@ -168,34 +169,65 @@ export default function ChatScreen() {
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
+          {messages.length === 0 && !isLoading && (
+            <View style={styles.emptyState}>
+              <View style={[styles.emptyIcon, { backgroundColor: c.accent }]}>
+                <Ionicons name="sparkles" size={32} color="#ffffff" />
+              </View>
+              <Text style={[styles.emptyTitle, { color: c.text }]}>Ask me anything</Text>
+              <Text style={[styles.emptySubtitle, { color: c.textMuted }]}>
+                Chat with your documents, track expenses, log workouts, or just ask a question.
+              </Text>
+            </View>
+          )}
+
           {messages.map((msg, i) => (
-            <View key={i} style={[styles.bubble, msg.role === 'user' ? styles.userBubble : styles.aiBubble]}>
-              {msg.role === 'user' ? (
-                <Text style={styles.userText}>{msg.content}</Text>
-              ) : (
-                <Markdown style={mdStyles}>{msg.content}</Markdown>
-              )}
-              {msg.metadata?.receipt_proposal && msg.metadata.receipt_proposal.length > 0 && (
-                <ReceiptProposalCard
-                  items={msg.metadata.receipt_proposal}
-                  onConfirmed={() => {}}
-                />
-              )}
-              {msg.metadata && msg.metadata.tools_executed.length > 0 && (
-                <View style={styles.toolBadge}>
-                  <Text style={styles.toolBadgeText}>⚙️ {msg.metadata.tools_executed.join(', ')}</Text>
+            <View key={i} style={msg.role === 'user' ? styles.userRow : styles.aiRow}>
+              {msg.role === 'assistant' && (
+                <View style={[styles.aiAvatar, { backgroundColor: c.accent }]}>
+                  <Ionicons name="sparkles" size={12} color="#ffffff" />
                 </View>
               )}
+              <View style={[
+                styles.bubble,
+                msg.role === 'user' ? styles.userBubble : styles.aiBubble,
+              ]}>
+                {msg.role === 'user' ? (
+                  <Text style={styles.userText}>{msg.content}</Text>
+                ) : (
+                  <Markdown style={mdStyles}>{msg.content}</Markdown>
+                )}
+                {msg.metadata?.receipt_proposal && msg.metadata.receipt_proposal.length > 0 && (
+                  <ReceiptProposalCard
+                    items={msg.metadata.receipt_proposal}
+                    onConfirmed={() => {}}
+                  />
+                )}
+                {msg.metadata && msg.metadata.tools_executed.length > 0 && (
+                  <View style={[styles.toolBadge, { backgroundColor: c.drawerActiveBg }]}>
+                    <View style={[styles.toolDot, { backgroundColor: c.accent }]} />
+                    <Text style={[styles.toolBadgeText, { color: c.accent }]}>
+                      {msg.metadata.tools_executed.join(' · ')}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
           ))}
 
-          {/* Loading bubble — shows tool names as they stream in */}
           {isLoading && (
-            <View style={[styles.bubble, styles.aiBubble, styles.loadingBubble]}>
-              <ActivityIndicator color={c.textMuted} />
-              {loadingTools.length > 0 && (
-                <Text style={styles.loadingToolText}>⚙️ {loadingTools.join(' · ')}</Text>
-              )}
+            <View style={styles.aiRow}>
+              <View style={[styles.aiAvatar, { backgroundColor: c.accent }]}>
+                <Ionicons name="sparkles" size={12} color="#ffffff" />
+              </View>
+              <View style={[styles.bubble, styles.aiBubble, styles.loadingBubble]}>
+                <ActivityIndicator color={c.accent} size="small" />
+                {loadingTools.length > 0 && (
+                  <Text style={[styles.loadingToolText, { color: c.textMuted }]}>
+                    {loadingTools.join(' · ')}
+                  </Text>
+                )}
+              </View>
             </View>
           )}
         </ScrollView>
@@ -207,31 +239,31 @@ export default function ChatScreen() {
           onClearAll={() => { setActiveFileIds([]); setActiveFileNames([]); }}
         />
 
-        <View style={styles.inputArea}>
+        <View style={[styles.inputArea, { backgroundColor: c.surface, borderTopColor: c.border }]}>
           <TouchableOpacity
-            style={[styles.attachBtn, uploading && { opacity: 0.5 }]}
+            style={[styles.attachBtn, { backgroundColor: c.surfaceVariant }, uploading && { opacity: 0.5 }]}
             onPress={handleAttach}
             disabled={uploading}
           >
             {uploading
               ? <ActivityIndicator size="small" color={c.accent} />
-              : <Text style={styles.attachIcon}>📎</Text>}
+              : <Ionicons name="attach" size={20} color={c.textMuted} />}
           </TouchableOpacity>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Message..."
+            placeholder="Message DocChat…"
             placeholderTextColor={c.placeholder}
             multiline
             onSubmitEditing={handleSend}
           />
           <TouchableOpacity
-            style={[styles.sendBtn, (!inputText.trim() || isLoading) && styles.sendBtnDisabled]}
+            style={[styles.sendBtn, { backgroundColor: canSend ? c.accent : c.surfaceVariant }]}
             onPress={handleSend}
-            disabled={!inputText.trim() || isLoading}
+            disabled={!canSend}
           >
-            <Text style={styles.sendBtnText}>Send</Text>
+            <Ionicons name="arrow-up" size={20} color={canSend ? '#ffffff' : c.textFaint} />
           </TouchableOpacity>
         </View>
 
@@ -243,21 +275,110 @@ export default function ChatScreen() {
 function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
     chatArea: { flex: 1 },
-    bubble: { padding: 14, borderRadius: 20, marginBottom: 10, maxWidth: '85%' },
-    userBubble: { backgroundColor: c.userBubble, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
-    aiBubble: { backgroundColor: c.aiBubble, alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
-    userText: { color: '#ffffff', fontSize: 16 },
-    toolBadge: { marginTop: 8, backgroundColor: c.drawerActiveBg, paddingVertical: 4, paddingHorizontal: 8, borderRadius: 12, alignSelf: 'flex-start' },
-    toolBadgeText: { fontSize: 12, color: c.accent, fontWeight: '600' },
+
+    emptyState: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 32,
+      paddingBottom: 60,
+    },
+    emptyIcon: {
+      width: 72,
+      height: 72,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    emptyTitle: {
+      fontSize: 24,
+      fontWeight: '700',
+      letterSpacing: -0.5,
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 15,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+
+    userRow: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 },
+    aiRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12, gap: 8 },
+    aiAvatar: {
+      width: 26,
+      height: 26,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 4,
+      flexShrink: 0,
+    },
+
+    bubble: { padding: 14, borderRadius: 18 },
+    userBubble: {
+      backgroundColor: c.userBubble,
+      borderBottomRightRadius: 4,
+      maxWidth: '85%',
+    },
+    aiBubble: {
+      backgroundColor: c.aiBubble,
+      borderBottomLeftRadius: 4,
+      borderLeftWidth: 3,
+      borderLeftColor: c.accent,
+      flex: 1,
+    },
+
+    userText: { color: '#ffffff', fontSize: 16, lineHeight: 22 },
+
+    toolBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 10,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderRadius: 20,
+      alignSelf: 'flex-start',
+      gap: 6,
+    },
+    toolDot: { width: 6, height: 6, borderRadius: 3 },
+    toolBadgeText: { fontSize: 11, fontWeight: '600' },
+
     loadingBubble: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    loadingToolText: { fontSize: 12, color: c.accent, fontWeight: '600', flexShrink: 1 },
-    inputArea: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: c.surface, borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.border, gap: 8 },
-    attachBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-    attachIcon: { fontSize: 22, color: '#007aff' },
-    input: { flex: 1, backgroundColor: c.inputBg, borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10, fontSize: 16, color: c.text, maxHeight: 120 },
-    sendBtn: { backgroundColor: c.accent, borderRadius: 22, justifyContent: 'center', paddingHorizontal: 18, height: 44 },
-    sendBtnDisabled: { opacity: 0.45 },
-    sendBtnText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+    loadingToolText: { fontSize: 12, flexShrink: 1 },
+
+    inputArea: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      gap: 8,
+    },
+    attachBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    input: {
+      flex: 1,
+      borderRadius: 16,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      fontSize: 16,
+      maxHeight: 120,
+      borderWidth: 1,
+    },
+    sendBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });
 }
 
@@ -268,7 +389,18 @@ function makeMdStyles(c: ThemeColors) {
     em: { fontStyle: 'italic' as const },
     bullet_list: { marginTop: 4, marginBottom: 4 },
     list_item: { marginVertical: 2 },
-    code_inline: { backgroundColor: c.surfaceVariant, borderRadius: 4, paddingHorizontal: 5, fontFamily: 'monospace', color: c.text },
-    fence: { backgroundColor: c.surfaceVariant, borderRadius: 6, padding: 10, color: c.text },
+    code_inline: {
+      backgroundColor: c.surfaceVariant,
+      borderRadius: 4,
+      paddingHorizontal: 5,
+      fontFamily: 'monospace',
+      color: c.accent,
+    },
+    fence: {
+      backgroundColor: c.surfaceVariant,
+      borderRadius: 8,
+      padding: 12,
+      color: c.text,
+    },
   };
 }

@@ -12,12 +12,21 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type ThemeColors } from '../src/theme';
 import { type Expense, createExpense, deleteExpense, getExpenses, updateExpense } from '../src/api';
 
 const today = new Date();
 const todayStr = today.toISOString().split('T')[0];
 const firstOfMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+
+const CATEGORY_COLORS = ['#7c6ef5', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6', '#f97316'];
+
+function categoryColor(cat: string): string {
+  let hash = 0;
+  for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+  return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
+}
 
 type FormState = {
   amount: string;
@@ -102,20 +111,40 @@ export default function ExpensesScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: c.background }]} edges={['bottom', 'left', 'right']}>
 
-        <View style={styles.filterRow}>
-          <TextInput style={styles.dateInput} value={startDate} onChangeText={setStartDate} onEndEditing={fetchExpenses} placeholder="YYYY-MM-DD" placeholderTextColor={c.placeholder} />
-          <Text style={styles.arrow}>→</Text>
-          <TextInput style={styles.dateInput} value={endDate} onChangeText={setEndDate} onEndEditing={fetchExpenses} placeholder="YYYY-MM-DD" placeholderTextColor={c.placeholder} />
-          <TouchableOpacity style={styles.refreshBtn} onPress={fetchExpenses}>
-            <Text style={styles.refreshIcon}>↻</Text>
+        {/* Date filter */}
+        <View style={[styles.filterRow, { backgroundColor: c.surface, borderBottomColor: c.border }]}>
+          <Ionicons name="calendar-outline" size={16} color={c.textMuted} style={{ marginRight: 8 }} />
+          <TextInput
+            style={[styles.dateInput, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+            value={startDate}
+            onChangeText={setStartDate}
+            onEndEditing={fetchExpenses}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={c.placeholder}
+          />
+          <Text style={[styles.arrow, { color: c.textMuted }]}>→</Text>
+          <TextInput
+            style={[styles.dateInput, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+            value={endDate}
+            onChangeText={setEndDate}
+            onEndEditing={fetchExpenses}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={c.placeholder}
+          />
+          <TouchableOpacity style={[styles.refreshBtn, { backgroundColor: c.accent }]} onPress={fetchExpenses}>
+            <Ionicons name="refresh" size={16} color="#ffffff" />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.totalBar}>
-          <Text style={styles.totalLabel}>Total ({expenses.length} items)</Text>
-          <Text style={styles.totalAmount}>€{total.toFixed(2)}</Text>
+        {/* Total bar */}
+        <View style={[styles.totalBar, { backgroundColor: c.surface, borderBottomColor: c.border }]}>
+          <View>
+            <Text style={[styles.totalLabel, { color: c.textMuted }]}>Total spent</Text>
+            <Text style={[styles.totalCount, { color: c.textMuted }]}>{expenses.length} transaction{expenses.length !== 1 ? 's' : ''}</Text>
+          </View>
+          <Text style={[styles.totalAmount, { color: c.accent }]}>€{total.toFixed(2)}</Text>
         </View>
 
         {loading ? (
@@ -124,39 +153,77 @@ export default function ExpensesScreen() {
           <FlatList
             data={expenses}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ flexGrow: 1 }}
-            ListEmptyComponent={<Text style={styles.empty}>No expenses in this period</Text>}
+            contentContainerStyle={{ flexGrow: 1, paddingVertical: 8 }}
+            ListEmptyComponent={
+              <View style={styles.emptyWrap}>
+                <Ionicons name="wallet-outline" size={40} color={c.textFaint} />
+                <Text style={[styles.empty, { color: c.textMuted }]}>No expenses in this period</Text>
+              </View>
+            }
             renderItem={({ item }) => (
-              <View style={styles.row}>
-                <View style={styles.rowLeft}>
-                  <Text style={styles.rowCategory}>{item.category}</Text>
-                  <Text style={styles.rowDate}>{item.date}</Text>
-                  {item.description ? <Text style={styles.rowDesc}>{item.description}</Text> : null}
+              <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border, borderLeftColor: categoryColor(item.category) }]}>
+                <View style={styles.cardLeft}>
+                  <View style={[styles.catDot, { backgroundColor: categoryColor(item.category) }]} />
+                  <View style={styles.cardInfo}>
+                    <Text style={[styles.rowCategory, { color: c.text }]}>{item.category}</Text>
+                    <Text style={[styles.rowDate, { color: c.textMuted }]}>{item.date}</Text>
+                    {item.description ? <Text style={[styles.rowDesc, { color: c.textFaint }]}>{item.description}</Text> : null}
+                  </View>
                 </View>
-                <Text style={styles.rowAmount}>€{item.amount.toFixed(2)}</Text>
-                <TouchableOpacity onPress={() => openEdit(item)} style={styles.iconBtn}>
-                  <Text style={styles.icon}>✏️</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.iconBtn}>
-                  <Text style={styles.icon}>🗑️</Text>
-                </TouchableOpacity>
+                <View style={styles.cardRight}>
+                  <Text style={[styles.rowAmount, { color: c.text }]}>€{item.amount.toFixed(2)}</Text>
+                  <View style={styles.actions}>
+                    <TouchableOpacity onPress={() => openEdit(item)} style={styles.iconBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                      <Ionicons name="pencil-outline" size={16} color={c.textMuted} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.iconBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                      <Ionicons name="trash-outline" size={16} color={c.danger} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             )}
           />
         )}
 
+        {/* Form */}
         {showForm && (
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>{editingId ? 'Edit Expense' : 'New Expense'}</Text>
-            <TextInput style={styles.input} placeholder="Amount (e.g. 12.50)" keyboardType="decimal-pad" value={form.amount} onChangeText={(v) => setForm((f) => ({ ...f, amount: v }))} placeholderTextColor={c.placeholder} />
-            <TextInput style={styles.input} placeholder="Category (e.g. Food, Fitness)" value={form.category} onChangeText={(v) => setForm((f) => ({ ...f, category: v }))} placeholderTextColor={c.placeholder} />
-            <TextInput style={styles.input} placeholder="Description (optional)" value={form.description} onChangeText={(v) => setForm((f) => ({ ...f, description: v }))} placeholderTextColor={c.placeholder} />
-            <TextInput style={styles.input} placeholder="Date (YYYY-MM-DD)" value={form.transaction_date} onChangeText={(v) => setForm((f) => ({ ...f, transaction_date: v }))} placeholderTextColor={c.placeholder} />
+          <View style={[styles.form, { backgroundColor: c.surface, borderTopColor: c.border }]}>
+            <Text style={[styles.formTitle, { color: c.text }]}>{editingId ? 'Edit Expense' : 'New Expense'}</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+              placeholder="Amount (e.g. 12.50)"
+              keyboardType="decimal-pad"
+              value={form.amount}
+              onChangeText={(v) => setForm((f) => ({ ...f, amount: v }))}
+              placeholderTextColor={c.placeholder}
+            />
+            <TextInput
+              style={[styles.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+              placeholder="Category (e.g. Food, Fitness)"
+              value={form.category}
+              onChangeText={(v) => setForm((f) => ({ ...f, category: v }))}
+              placeholderTextColor={c.placeholder}
+            />
+            <TextInput
+              style={[styles.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+              placeholder="Description (optional)"
+              value={form.description}
+              onChangeText={(v) => setForm((f) => ({ ...f, description: v }))}
+              placeholderTextColor={c.placeholder}
+            />
+            <TextInput
+              style={[styles.input, { backgroundColor: c.inputBg, color: c.text, borderColor: c.border }]}
+              placeholder="Date (YYYY-MM-DD)"
+              value={form.transaction_date}
+              onChangeText={(v) => setForm((f) => ({ ...f, transaction_date: v }))}
+              placeholderTextColor={c.placeholder}
+            />
             <View style={styles.formActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={closeForm}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
+              <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: c.cancelBg }]} onPress={closeForm}>
+                <Text style={[styles.cancelBtnText, { color: c.cancelText }]}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: c.accent }]} onPress={handleSave}>
                 <Text style={styles.saveBtnText}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -164,8 +231,8 @@ export default function ExpensesScreen() {
         )}
 
         {!showForm && (
-          <TouchableOpacity style={styles.fab} onPress={openAdd}>
-            <Text style={styles.fabText}>+</Text>
+          <TouchableOpacity style={[styles.fab, { backgroundColor: c.accent, shadowColor: c.accent }]} onPress={openAdd}>
+            <Ionicons name="add" size={28} color="#ffffff" />
           </TouchableOpacity>
         )}
       </SafeAreaView>
@@ -175,33 +242,105 @@ export default function ExpensesScreen() {
 
 function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: c.background },
-    filterRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, backgroundColor: c.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border },
-    dateInput: { flex: 1, backgroundColor: c.inputBg, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7, fontSize: 13, color: c.text },
-    arrow: { marginHorizontal: 6, color: c.textMuted, fontSize: 14 },
-    refreshBtn: { marginLeft: 8, width: 32, height: 32, borderRadius: 16, backgroundColor: c.accent, justifyContent: 'center', alignItems: 'center' },
-    refreshIcon: { color: '#fff', fontSize: 16 },
-    totalBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: c.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border },
-    totalLabel: { fontSize: 14, color: c.textMuted },
-    totalAmount: { fontSize: 18, fontWeight: '700', color: c.accent },
-    row: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: c.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.borderLight },
-    rowLeft: { flex: 1 },
-    rowCategory: { fontSize: 15, fontWeight: '600', color: c.text },
-    rowDate: { fontSize: 12, color: c.textMuted, marginTop: 2 },
-    rowDesc: { fontSize: 12, color: c.textFaint, marginTop: 1 },
-    rowAmount: { fontSize: 16, fontWeight: '600', marginRight: 4, color: c.textSecondary },
-    iconBtn: { padding: 6 },
-    icon: { fontSize: 16 },
-    empty: { textAlign: 'center', marginTop: 60, color: c.textMuted, fontSize: 15 },
-    form: { backgroundColor: c.surface, padding: 16, borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.border },
-    formTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12, color: c.text },
-    input: { backgroundColor: c.inputBg, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, marginBottom: 10, color: c.text },
+    container: { flex: 1 },
+    filterRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+    dateInput: {
+      flex: 1,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      fontSize: 13,
+      borderWidth: 1,
+    },
+    arrow: { marginHorizontal: 8, fontSize: 14 },
+    refreshBtn: {
+      marginLeft: 10,
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    totalBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+    totalLabel: { fontSize: 13, fontWeight: '500' },
+    totalCount: { fontSize: 12, marginTop: 2 },
+    totalAmount: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
+
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 12,
+      marginVertical: 4,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderLeftWidth: 4,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 3,
+    },
+    cardLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+    catDot: { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
+    cardInfo: { flex: 1 },
+    rowCategory: { fontSize: 15, fontWeight: '600' },
+    rowDate: { fontSize: 12, marginTop: 2 },
+    rowDesc: { fontSize: 12, marginTop: 1 },
+    cardRight: { alignItems: 'flex-end', gap: 6 },
+    rowAmount: { fontSize: 17, fontWeight: '700' },
+    actions: { flexDirection: 'row', gap: 4 },
+    iconBtn: { padding: 4 },
+
+    emptyWrap: { alignItems: 'center', marginTop: 80, gap: 12 },
+    empty: { fontSize: 15 },
+
+    form: {
+      padding: 16,
+      borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    formTitle: { fontSize: 17, fontWeight: '700', marginBottom: 14 },
+    input: {
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      marginBottom: 10,
+      borderWidth: 1,
+    },
     formActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 10, backgroundColor: c.cancelBg, alignItems: 'center' },
-    cancelBtnText: { fontSize: 15, color: c.cancelText },
-    saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 10, backgroundColor: c.accent, alignItems: 'center' },
-    saveBtnText: { fontSize: 15, color: '#fff', fontWeight: '600' },
-    fab: { position: 'absolute', bottom: 28, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: c.accent, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 },
-    fabText: { color: '#fff', fontSize: 30, lineHeight: 34 },
+    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+    cancelBtnText: { fontSize: 15, fontWeight: '600' },
+    saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+    saveBtnText: { fontSize: 15, color: '#fff', fontWeight: '700' },
+
+    fab: {
+      position: 'absolute',
+      bottom: 28,
+      right: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 8,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+    },
   });
 }

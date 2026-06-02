@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type ThemeColors } from '../src/theme';
 import { type ReceiptItem, type UploadedFile, deleteFile, getFiles, uploadFile } from '../src/api';
 import ReceiptProposalCard from '../src/components/ReceiptProposalCard';
@@ -19,11 +20,11 @@ import ReceiptProposalCard from '../src/components/ReceiptProposalCard';
 const CATEGORIES = ['all', 'general', 'receipt', 'document', 'spreadsheet', 'image'] as const;
 type Category = (typeof CATEGORIES)[number];
 
-const FILE_ICONS: Record<string, string> = {
-  image: '🖼️',
-  pdf: '📄',
-  txt: '📝',
-  excel: '📊',
+const FILE_TYPE_ICON: Record<string, { name: string; color: string }> = {
+  image:  { name: 'image-outline',         color: '#10b981' },
+  pdf:    { name: 'document-text-outline', color: '#ef4444' },
+  txt:    { name: 'document-outline',      color: '#6a6a8a' },
+  excel:  { name: 'grid-outline',          color: '#22c55e' },
 };
 
 function formatSize(bytes: number): string {
@@ -124,24 +125,33 @@ export default function FilesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.background }]} edges={['bottom', 'left', 'right']}>
 
       {/* Category chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow} contentContainerStyle={styles.chipContent}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={[styles.chipRow, { backgroundColor: c.surface, borderBottomColor: c.border }]}
+        contentContainerStyle={styles.chipContent}
+      >
         {CATEGORIES.map((cat) => (
           <TouchableOpacity
             key={cat}
-            style={[styles.chip, activeCategory === cat && styles.chipActive]}
+            style={[
+              styles.chip,
+              { borderColor: activeCategory === cat ? c.accent : c.border },
+              activeCategory === cat && { backgroundColor: c.accent },
+            ]}
             onPress={() => setActiveCategory(cat)}
           >
-            <Text style={[styles.chipText, activeCategory === cat && styles.chipTextActive]}>
+            <Text style={[styles.chipText, { color: activeCategory === cat ? '#ffffff' : c.textMuted }]}>
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
             </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Receipt proposal card — shown immediately after upload */}
+      {/* Receipt proposal card */}
       {receiptProposal && (
         <View style={{ paddingHorizontal: 12, paddingTop: 8 }}>
           <Text style={{ fontSize: 12, color: c.textMuted, marginBottom: 4 }}>
@@ -160,51 +170,72 @@ export default function FilesScreen() {
       ) : (
         <ScrollView style={{ flex: 1 }}>
           {files.length === 0 && (
-            <Text style={styles.empty}>No files yet. Tap + to upload.</Text>
-          )}
-          {files.map((f) => (
-            <View key={f.id} style={styles.card}>
-              <TouchableOpacity style={styles.cardHeader} onPress={() => setExpandedId(expandedId === f.id ? null : f.id)}>
-                <Text style={styles.fileIcon}>{FILE_ICONS[f.file_type] ?? '📁'}</Text>
-                <View style={styles.fileInfo}>
-                  <Text style={styles.fileName} numberOfLines={1}>{f.original_name}</Text>
-                  <Text style={styles.fileMeta}>
-                    {formatSize(f.size_bytes)} · {f.uploaded_at.slice(0, 10)}
-                    {f.is_receipt ? ' · 🧾 Receipt' : ''}
-                  </Text>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: statusColor(f.status, c) }]}>
-                  <Text style={styles.statusText}>{f.status}</Text>
-                </View>
-              </TouchableOpacity>
-
-              {expandedId === f.id && (
-                <View style={styles.expanded}>
-                  {f.extracted_text ? (
-                    <ScrollView style={styles.textPreview} nestedScrollEnabled>
-                      <Text style={styles.previewText}>{f.extracted_text.slice(0, 1500)}{f.extracted_text.length > 1500 ? '\n…' : ''}</Text>
-                    </ScrollView>
-                  ) : (
-                    <Text style={styles.noText}>{f.error_message ?? 'No text extracted.'}</Text>
-                  )}
-                  <View style={styles.expandedActions}>
-                    <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: c.accent }]}
-                      onPress={() => router.push({ pathname: '/', params: { fileId: f.id, fileName: f.original_name } })}
-                    >
-                      <Text style={styles.actionBtnText}>Ask about this</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: c.cancelBg }]}
-                      onPress={() => handleDelete(f.id, f.original_name)}
-                    >
-                      <Text style={[styles.actionBtnText, { color: c.cancelText }]}>Delete</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
+            <View style={styles.emptyWrap}>
+              <Ionicons name="folder-open-outline" size={40} color={c.textFaint} />
+              <Text style={[styles.empty, { color: c.textMuted }]}>No files yet. Tap + to upload.</Text>
             </View>
-          ))}
+          )}
+          {files.map((f) => {
+            const iconInfo = FILE_TYPE_ICON[f.file_type] ?? { name: 'document-outline', color: c.textMuted };
+            return (
+              <View key={f.id} style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+                <TouchableOpacity
+                  style={styles.cardHeader}
+                  onPress={() => setExpandedId(expandedId === f.id ? null : f.id)}
+                >
+                  <View style={[styles.fileIconBox, { backgroundColor: iconInfo.color + '22' }]}>
+                    <Ionicons name={iconInfo.name as any} size={20} color={iconInfo.color} />
+                  </View>
+                  <View style={styles.fileInfo}>
+                    <Text style={[styles.fileName, { color: c.text }]} numberOfLines={1}>{f.original_name}</Text>
+                    <Text style={[styles.fileMeta, { color: c.textMuted }]}>
+                      {formatSize(f.size_bytes)} · {f.uploaded_at.slice(0, 10)}
+                      {f.is_receipt ? ' · Receipt' : ''}
+                    </Text>
+                  </View>
+                  <View style={[styles.statusBadge, { backgroundColor: statusBg(f.status, c) }]}>
+                    <Text style={[styles.statusText, { color: statusFg(f.status, c) }]}>{f.status}</Text>
+                  </View>
+                  <Ionicons
+                    name={expandedId === f.id ? 'chevron-up' : 'chevron-down'}
+                    size={14}
+                    color={c.textMuted}
+                    style={{ marginLeft: 6 }}
+                  />
+                </TouchableOpacity>
+
+                {expandedId === f.id && (
+                  <View style={[styles.expanded, { borderTopColor: c.borderLight }]}>
+                    {f.extracted_text ? (
+                      <ScrollView style={[styles.textPreview, { backgroundColor: c.surfaceVariant }]} nestedScrollEnabled>
+                        <Text style={[styles.previewText, { color: c.textSecondary }]}>
+                          {f.extracted_text.slice(0, 1500)}{f.extracted_text.length > 1500 ? '\n…' : ''}
+                        </Text>
+                      </ScrollView>
+                    ) : (
+                      <Text style={[styles.noText, { color: c.textMuted }]}>{f.error_message ?? 'No text extracted.'}</Text>
+                    )}
+                    <View style={styles.expandedActions}>
+                      <TouchableOpacity
+                        style={[styles.actionBtn, { backgroundColor: c.accent }]}
+                        onPress={() => router.push({ pathname: '/', params: { fileId: f.id, fileName: f.original_name } })}
+                      >
+                        <Ionicons name="chatbubble-outline" size={14} color="#ffffff" />
+                        <Text style={styles.actionBtnText}>Ask about this</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.actionBtn, { backgroundColor: c.danger + '22', borderWidth: 1, borderColor: c.danger + '44' }]}
+                        onPress={() => handleDelete(f.id, f.original_name)}
+                      >
+                        <Ionicons name="trash-outline" size={14} color={c.danger} />
+                        <Text style={[styles.actionBtnText, { color: c.danger }]}>Delete</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </View>
+            );
+          })}
           <View style={{ height: 90 }} />
         </ScrollView>
       )}
@@ -212,19 +243,23 @@ export default function FilesScreen() {
       {/* Action sheet overlay */}
       {showActionSheet && (
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setShowActionSheet(false)}>
-          <View style={styles.actionSheet}>
-            <Text style={styles.actionSheetTitle}>Add File</Text>
-            <TouchableOpacity style={styles.sheetBtn} onPress={openCamera}>
-              <Text style={styles.sheetBtnText}>📷  Camera (receipt photo)</Text>
+          <View style={[styles.actionSheet, { backgroundColor: c.surface }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: c.border }]} />
+            <Text style={[styles.actionSheetTitle, { color: c.text }]}>Add File</Text>
+            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.surfaceVariant }]} onPress={openCamera}>
+              <Ionicons name="camera-outline" size={20} color={c.accent} />
+              <Text style={[styles.sheetBtnText, { color: c.text }]}>Camera (receipt photo)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sheetBtn} onPress={pickImage}>
-              <Text style={styles.sheetBtnText}>🖼️  Photo Library</Text>
+            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.surfaceVariant }]} onPress={pickImage}>
+              <Ionicons name="image-outline" size={20} color={c.accent} />
+              <Text style={[styles.sheetBtnText, { color: c.text }]}>Photo Library</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sheetBtn} onPress={pickDocument}>
-              <Text style={styles.sheetBtnText}>📁  Browse Files (PDF, TXT, Excel)</Text>
+            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.surfaceVariant }]} onPress={pickDocument}>
+              <Ionicons name="folder-open-outline" size={20} color={c.accent} />
+              <Text style={[styles.sheetBtnText, { color: c.text }]}>Browse Files (PDF, TXT, Excel)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.sheetBtn, styles.cancelSheetBtn]} onPress={() => setShowActionSheet(false)}>
-              <Text style={[styles.sheetBtnText, { color: c.cancelText }]}>Cancel</Text>
+            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.cancelBg }]} onPress={() => setShowActionSheet(false)}>
+              <Text style={[styles.sheetBtnText, { color: c.cancelText, textAlign: 'center' }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -236,52 +271,124 @@ export default function FilesScreen() {
           <ActivityIndicator color={c.accent} />
         </View>
       ) : (
-        <TouchableOpacity style={styles.fab} onPress={() => setShowActionSheet(true)}>
-          <Text style={styles.fabText}>+</Text>
+        <TouchableOpacity style={[styles.fab, { backgroundColor: c.accent, shadowColor: c.accent }]} onPress={() => setShowActionSheet(true)}>
+          <Ionicons name="add" size={28} color="#ffffff" />
         </TouchableOpacity>
       )}
     </SafeAreaView>
   );
 }
 
-function statusColor(status: string, c: ThemeColors): string {
-  if (status === 'ready') return '#34c759';
-  if (status === 'error') return '#ff3b30';
+function statusBg(status: string, c: ThemeColors): string {
+  if (status === 'ready') return c.success + '22';
+  if (status === 'error') return c.danger + '22';
+  return c.surfaceVariant;
+}
+
+function statusFg(status: string, c: ThemeColors): string {
+  if (status === 'ready') return c.success;
+  if (status === 'error') return c.danger;
   return c.textMuted;
 }
 
 function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: c.background },
-    chipRow: { flexGrow: 0, backgroundColor: c.surface, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border },
+    container: { flex: 1 },
+    chipRow: { flexGrow: 0, borderBottomWidth: StyleSheet.hairlineWidth },
     chipContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
-    chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, backgroundColor: c.inputBg },
-    chipActive: { backgroundColor: c.accent },
-    chipText: { fontSize: 13, color: c.textMuted },
-    chipTextActive: { color: '#fff', fontWeight: '600' },
-    empty: { textAlign: 'center', marginTop: 60, color: c.textMuted, fontSize: 15 },
-    card: { backgroundColor: c.surface, marginTop: 8, marginHorizontal: 12, borderRadius: 12, overflow: 'hidden', elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', padding: 12 },
-    fileIcon: { fontSize: 28, marginRight: 12 },
+    chip: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+    },
+    chipText: { fontSize: 13, fontWeight: '600' },
+
+    emptyWrap: { alignItems: 'center', marginTop: 80, gap: 12 },
+    empty: { fontSize: 15 },
+
+    card: {
+      marginHorizontal: 12,
+      marginTop: 8,
+      borderRadius: 14,
+      borderWidth: 1,
+      overflow: 'hidden',
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 3,
+    },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+    fileIconBox: {
+      width: 40,
+      height: 40,
+      borderRadius: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexShrink: 0,
+    },
     fileInfo: { flex: 1 },
-    fileName: { fontSize: 14, fontWeight: '600', color: c.text },
-    fileMeta: { fontSize: 12, color: c.textMuted, marginTop: 2 },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
-    statusText: { fontSize: 11, color: '#fff', fontWeight: '600' },
-    expanded: { padding: 12, borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.borderLight },
-    textPreview: { maxHeight: 200, backgroundColor: c.surfaceVariant, borderRadius: 8, padding: 10, marginBottom: 10 },
-    previewText: { fontSize: 12, color: c.textSecondary, lineHeight: 18 },
-    noText: { fontSize: 13, color: c.textMuted, marginBottom: 10 },
+    fileName: { fontSize: 14, fontWeight: '600' },
+    fileMeta: { fontSize: 12, marginTop: 2 },
+    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+    statusText: { fontSize: 11, fontWeight: '700' },
+
+    expanded: { padding: 12, borderTopWidth: StyleSheet.hairlineWidth },
+    textPreview: { maxHeight: 200, borderRadius: 10, padding: 10, marginBottom: 10 },
+    previewText: { fontSize: 12, lineHeight: 18 },
+    noText: { fontSize: 13, marginBottom: 10 },
     expandedActions: { flexDirection: 'row', gap: 10 },
-    actionBtn: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
-    actionBtnText: { fontSize: 14, color: '#fff', fontWeight: '600' },
-    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-    actionSheet: { backgroundColor: c.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16, paddingBottom: 32 },
-    actionSheetTitle: { fontSize: 16, fontWeight: '700', color: c.text, textAlign: 'center', marginBottom: 16 },
-    sheetBtn: { paddingVertical: 14, borderRadius: 10, backgroundColor: c.inputBg, alignItems: 'center', marginBottom: 10 },
-    cancelSheetBtn: { backgroundColor: c.cancelBg },
-    sheetBtnText: { fontSize: 15, color: c.text, fontWeight: '500' },
-    fab: { position: 'absolute', bottom: 28, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: c.accent, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 },
-    fabText: { color: '#fff', fontSize: 30, lineHeight: 34 },
+    actionBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 10,
+      borderRadius: 10,
+      gap: 6,
+    },
+    actionBtnText: { fontSize: 13, color: '#fff', fontWeight: '600' },
+
+    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+    actionSheet: {
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      padding: 16,
+      paddingBottom: 36,
+      gap: 10,
+    },
+    sheetHandle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      alignSelf: 'center',
+      marginBottom: 12,
+    },
+    actionSheetTitle: { fontSize: 17, fontWeight: '700', textAlign: 'center', marginBottom: 6 },
+    sheetBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 14,
+      gap: 12,
+    },
+    sheetBtnText: { fontSize: 15, fontWeight: '500', flex: 1 },
+
+    fab: {
+      position: 'absolute',
+      bottom: 28,
+      right: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 8,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+    },
   });
 }

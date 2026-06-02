@@ -22,68 +22,74 @@ export type ThemeColors = {
   aiBubbleText: string;
   placeholder: string;
   drawerActiveBg: string;
+  success: string;
+  danger: string;
 };
 
 export type AppTheme = { dark: boolean; colors: ThemeColors };
 
 const light: ThemeColors = {
-  background:    '#f2f2f7',
+  background:    '#f0eeff',
   surface:       '#ffffff',
-  surfaceVariant:'#f2f2f7',
-  border:        '#e5e5ea',
-  borderLight:   '#f2f2f7',
-  text:          '#000000',
-  textSecondary: '#3c3c43',
-  textMuted:     '#8e8e93',
-  textFaint:     '#c7c7cc',
-  accent:        '#007aff',
+  surfaceVariant:'#e8e4ff',
+  border:        '#d4ccf7',
+  borderLight:   '#e8e4ff',
+  text:          '#1a1040',
+  textSecondary: '#3d2e7c',
+  textMuted:     '#7a6aa0',
+  textFaint:     '#c0b3e8',
+  accent:        '#6c5ce7',
   accentText:    '#ffffff',
-  headerBg:      '#007aff',
+  headerBg:      '#6c5ce7',
   drawerBg:      '#ffffff',
-  inputBg:       '#f2f2f7',
-  cancelBg:      '#e5e5ea',
-  cancelText:    '#3c3c43',
-  userBubble:    '#007aff',
-  aiBubble:      '#e5e5ea',
-  aiBubbleText:  '#000000',
-  placeholder:   '#c7c7cc',
-  drawerActiveBg:'rgba(0,122,255,0.1)',
+  inputBg:       '#ece9ff',
+  cancelBg:      '#e2deff',
+  cancelText:    '#3d2e7c',
+  userBubble:    '#6c5ce7',
+  aiBubble:      '#f0eeff',
+  aiBubbleText:  '#1a1040',
+  placeholder:   '#c0b3e8',
+  drawerActiveBg:'rgba(108,92,231,0.1)',
+  success:       '#22c55e',
+  danger:        '#ef4444',
 };
 
 const dark: ThemeColors = {
-  background:    '#000000',
-  surface:       '#1c1c1e',
-  surfaceVariant:'#2c2c2e',
-  border:        '#38383a',
-  borderLight:   '#2c2c2e',
-  text:          '#ffffff',
-  textSecondary: '#ebebf5',
-  textMuted:     '#8e8e93',
-  textFaint:     '#48484a',
-  accent:        '#0a84ff',
+  background:    '#0d0d14',
+  surface:       '#151520',
+  surfaceVariant:'#1d1d2c',
+  border:        '#2a2a3d',
+  borderLight:   '#1d1d2c',
+  text:          '#e8e8f5',
+  textSecondary: '#b0b0cc',
+  textMuted:     '#6a6a8a',
+  textFaint:     '#3a3a52',
+  accent:        '#7c6ef5',
   accentText:    '#ffffff',
-  headerBg:      '#1c1c1e',
-  drawerBg:      '#1c1c1e',
-  inputBg:       '#2c2c2e',
-  cancelBg:      '#3a3a3c',
-  cancelText:    '#ebebf5',
-  userBubble:    '#0a84ff',
-  aiBubble:      '#2c2c2e',
-  aiBubbleText:  '#ffffff',
-  placeholder:   '#636366',
-  drawerActiveBg:'rgba(10,132,255,0.18)',
+  headerBg:      '#151520',
+  drawerBg:      '#0d0d14',
+  inputBg:       '#1d1d2c',
+  cancelBg:      '#252536',
+  cancelText:    '#b0b0cc',
+  userBubble:    '#6558d3',
+  aiBubble:      '#1d1d2c',
+  aiBubbleText:  '#e8e8f5',
+  placeholder:   '#4a4a65',
+  drawerActiveBg:'rgba(124,110,245,0.15)',
+  success:       '#4ade80',
+  danger:        '#f87171',
 };
 
 type Ctx = { theme: AppTheme; isDark: boolean; toggleTheme: () => void };
 
 const ThemeContext = createContext<Ctx>({
-  theme: { dark: false, colors: light },
-  isDark: false,
+  theme: { dark: true, colors: dark },
+  isDark: true,
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const toggleTheme = useCallback(() => setIsDark((d) => !d), []);
   const theme: AppTheme = isDark
     ? { dark: true, colors: dark }

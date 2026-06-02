@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { createExpensesBulk, type ReceiptItem } from '../api';
 import { useTheme } from '../theme';
 
@@ -31,17 +32,26 @@ export default function ReceiptProposalCard({ items, onConfirmed }: Props) {
 
   if (confirmed) {
     return (
-      <View style={[styles.card, { backgroundColor: c.surfaceVariant, borderColor: '#34c759' }]}>
-        <Text style={{ color: '#34c759', fontWeight: '700', fontSize: 15 }}>
-          ✅ {items.length} expense{items.length !== 1 ? 's' : ''} saved!
-        </Text>
+      <View style={[styles.card, { backgroundColor: c.surfaceVariant, borderColor: c.success + '44' }]}>
+        <View style={styles.confirmedRow}>
+          <Ionicons name="checkmark-circle" size={20} color={c.success} />
+          <Text style={[styles.confirmedText, { color: c.success }]}>
+            {items.length} expense{items.length !== 1 ? 's' : ''} saved!
+          </Text>
+        </View>
       </View>
     );
   }
 
   return (
     <View style={[styles.card, { backgroundColor: c.surfaceVariant, borderColor: c.border }]}>
-      <Text style={[styles.title, { color: c.text }]}>🧾 Found {items.length} item{items.length !== 1 ? 's' : ''} on this receipt:</Text>
+      {/* Header strip */}
+      <View style={[styles.header, { backgroundColor: c.accent + '1a' }]}>
+        <Ionicons name="receipt-outline" size={16} color={c.accent} />
+        <Text style={[styles.headerText, { color: c.accent }]}>
+          {items.length} item{items.length !== 1 ? 's' : ''} found on receipt
+        </Text>
+      </View>
 
       {items.map((item, i) => (
         <View key={i} style={[styles.row, { borderBottomColor: c.borderLight }]}>
@@ -49,7 +59,7 @@ export default function ReceiptProposalCard({ items, onConfirmed }: Props) {
             <Text style={[styles.desc, { color: c.text }]}>{item.description}</Text>
             <Text style={[styles.cat, { color: c.textMuted }]}>{item.category}</Text>
           </View>
-          <Text style={[styles.amount, { color: c.textSecondary }]}>€{item.amount.toFixed(2)}</Text>
+          <Text style={[styles.amount, { color: c.accent }]}>€{item.amount.toFixed(2)}</Text>
         </View>
       ))}
 
@@ -63,22 +73,60 @@ export default function ReceiptProposalCard({ items, onConfirmed }: Props) {
         onPress={handleConfirmAll}
         disabled={loading}
       >
-        <Text style={styles.confirmBtnText}>{loading ? 'Saving…' : 'Confirm All'}</Text>
+        {loading
+          ? <Text style={styles.confirmBtnText}>Saving…</Text>
+          : (
+            <>
+              <Ionicons name="checkmark" size={16} color="#ffffff" />
+              <Text style={styles.confirmBtnText}>Confirm All</Text>
+            </>
+          )}
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 12, borderWidth: 1, padding: 14, marginTop: 10 },
-  title: { fontSize: 14, fontWeight: '700', marginBottom: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth },
+  card: { borderRadius: 14, borderWidth: 1, overflow: 'hidden', marginTop: 10 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  headerText: { fontSize: 13, fontWeight: '700' },
+  confirmedRow: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 14 },
+  confirmedText: { fontSize: 15, fontWeight: '700' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   desc: { fontSize: 13, fontWeight: '600' },
-  cat: { fontSize: 11, marginTop: 1 },
-  amount: { fontSize: 14, fontWeight: '600' },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, marginTop: 4, borderTopWidth: StyleSheet.hairlineWidth },
+  cat: { fontSize: 11, marginTop: 2 },
+  amount: { fontSize: 14, fontWeight: '700' },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
   totalLabel: { fontSize: 13, fontWeight: '600' },
-  totalAmount: { fontSize: 15, fontWeight: '700' },
-  confirmBtn: { marginTop: 14, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
+  totalAmount: { fontSize: 16, fontWeight: '800' },
+  confirmBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 14,
+    marginBottom: 14,
+    marginTop: 4,
+    paddingVertical: 13,
+    borderRadius: 12,
+    gap: 6,
+  },
   confirmBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
