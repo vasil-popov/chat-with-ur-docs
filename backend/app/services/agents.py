@@ -4,6 +4,7 @@ from typing import Literal
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, MessagesState, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import create_react_agent
 from langgraph.types import Command
 from pydantic import BaseModel
@@ -32,6 +33,28 @@ Do NOT attempt to log expenses, log workouts, or search uploaded documents yours
 for one of those, briefly let them know you'll hand it off to the appropriate specialist and keep your reply short.
 
 Be concise, conversational, and accurate. Today's date: {today}."""
+
+MONOLITHIC_SYSTEM_PROMPT = """You are a single, capable personal assistant that handles everything yourself.
+
+You have three areas of capability, all available to you through the tools provided:
+
+1. Fitness and finance tracking:
+   - Log expenses (grocery bills, restaurant tabs, purchases, anything the user wants to record as a spend).
+   - Log workouts and exercises.
+   - Query expense and workout history.
+   When the user mentions items from a receipt, store, or grocery trip, log those as expenses.
+   Always confirm what you recorded.
+
+2. Document Q&A:
+   - Search through uploaded documents and answer questions based on their content.
+   - Cite the source document when you answer from a file.
+
+3. General assistance:
+   - Handle general knowledge questions, chitchat, greetings, and follow-up clarifications.
+   - Be concise, conversational, and accurate.
+
+Decide for yourself which tools (if any) to use for each request and complete the task end to end.
+Today's date: {today}."""
 
 SUPERVISOR_SYSTEM_PROMPT = """You are a routing supervisor. Decide which specialist to invoke next.
 
@@ -80,7 +103,7 @@ def _clean_messages_for_general(msgs: list) -> list:
     ]
 
 
-def build_graph(llm, mcp_tools: list, rag_tools: list):
+def build_graph(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
     today = date.today().isoformat()
 
     tracking_agent = create_react_agent(
@@ -161,3 +184,30 @@ def build_graph(llm, mcp_tools: list, rag_tools: list):
 
     logger.info("LangGraph Supervisor compiled with %d MCP tools and %d RAG tools", len(mcp_tools), len(rag_tools))
     return graph
+
+
+def build_monolithic_agent(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
+    """Build the monolithic ReAct-agent arm of the thesis comparison.
+
+    A single ``create_react_agent`` is given the union of every tool and a prompt
+    that merges all specialist capabilities. To keep the architecture comparison
+    fair, this arm intentionally reuses the SAME ``llm`` instance and the SAME
+    tool objects passed to ``build_graph`` for the supervisor arm; architecture
+    is the only variable that differs between the two arms.
+
+    Returns a compiled LangGraph graph that is drop-in compatible with
+    ``chat_service`` (supports ``astream_events`` / ``ainvoke``).
+    """
+    today = date.today().isoformat()
+
+    logger.info(
+        "Monolithic ReAct agent compiled with %d MCP tools and %d RAG tools",
+        len(mcp_tools),
+        len(rag_tools),
+    )
+
+    return create_react_agent(
+        llm,
+        mcp_tools + rag_tools,
+        prompt=SystemMessage(content=MONOLITHIC_SYSTEM_PROMPT.format(today=today)),
+    )

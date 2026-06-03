@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/stream", summary="Chat API (SSE streaming)")
 async def chat_stream(req: ChatRequest, db: Session = Depends(get_session)):
-    agent = di_container_instance.agent_instance
+    agent = di_container_instance.get_agent(req.arch)
     return StreamingResponse(
         chat_service.stream_chat(agent, req.message, req.file_ids or [], db),
         media_type="text/event-stream",
@@ -23,7 +23,7 @@ async def chat_stream(req: ChatRequest, db: Session = Depends(get_session)):
 @router.post("", summary="Chat API")
 async def chat(
     req: ChatRequest,
-    agent=Depends(di_container_instance.get_agent_instance),
     db: Session = Depends(get_session),
 ):
+    agent = di_container_instance.get_agent(req.arch)
     return await chat_service.invoke_chat(agent, req.message, req.file_ids or [], db)

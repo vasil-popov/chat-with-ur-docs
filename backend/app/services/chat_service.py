@@ -3,17 +3,21 @@ import logging
 import uuid as _uuid
 from typing import AsyncGenerator
 
+from langchain_core.messages import AIMessage
 from sqlmodel import Session
 
 from app.db.database import UploadedFile
 
 logger = logging.getLogger(__name__)
 
-# Node/chain names that are internal to LangGraph — not shown to the user
+# Node/chain names that are internal to LangGraph — not shown to the user.
+# "agent" and "tools" are the ReAct-loop node names emitted by
+# create_react_agent (the monolithic arm); they are NOT user-facing tools.
 _INTERNAL_NAMES = frozenset({
     "supervisor", "tracking", "rag", "LangGraph", "RunnableSequence",
     "RunnableLambda", "RunnableParallel", "__start__", "__end__",
     "ChatPromptTemplate", "ChannelWrite", "ChannelRead", "ToolNode",
+    "agent", "tools",
 })
 
 
@@ -42,6 +46,21 @@ def extract_content(msg) -> str:
     return str(content) if content else ""
 
 
+def _is_final_answer(msg) -> bool:
+    """True only for a terminal assistant answer.
+
+    A terminal answer is an ``AIMessage`` that carries real content and does NOT
+    request tool calls. Intermediate ReAct steps (the create_react_agent
+    "agent" node) emit ``AIMessage`` objects whose ``content`` is empty/placeholder
+    and whose ``tool_calls`` is populated — those must never overwrite a real answer.
+    """
+    if not isinstance(msg, AIMessage):
+        return False
+    if getattr(msg, "tool_calls", None):
+        return False
+    return bool(extract_content(msg).strip())
+
+
 async def stream_chat(
     agent,
     message: str,
@@ -53,7 +72,10 @@ async def stream_chat(
     config = {"recursion_limit": 8}
 
     tools_seen: list[str] = []
-    last_content: str = ""
+    # Terminal assistant answer (no tool_calls); wins over any intermediate text.
+    last_final_content: str = ""
+    # Fallback text captured before any terminal answer is seen.
+    last_any_content: str = ""
 
     try:
         async for event in agent.astream_events(initial_state, config=config, version="v2"):
@@ -70,11 +92,21 @@ async def stream_chat(
                 if isinstance(output, dict):
                     msgs = output.get("messages", [])
                     if msgs:
-                        candidate = extract_content(msgs[-1])
-                        if candidate.strip():
-                            last_content = candidate
+                        final_msg = msgs[-1]
+                        # A terminal AIMessage (no tool_calls) is the clean answer
+                        # for BOTH graph shapes: the supervisor sub-agent nodes
+                        # append a final AIMessage, and the monolithic ReAct loop
+                        # ends on an AIMessage without tool_calls. Intermediate
+                        # AIMessages carrying tool_calls must not overwrite it.
+                        if _is_final_answer(final_msg):
+                            last_final_content = extract_content(final_msg)
+                        else:
+                            candidate = extract_content(final_msg)
+                            if candidate.strip():
+                                last_any_content = candidate
 
-        yield f"data: {json.dumps({'type': 'done', 'content': last_content, 'tools': tools_seen})}\n\n"
+        final_content = last_final_content or last_any_content
+        yield f"data: {json.dumps({'type': 'done', 'content': final_content, 'tools': tools_seen})}\n\n"
 
     except Exception as e:
         logger.error("SSE stream error: %s", e)

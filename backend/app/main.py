@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     from app.deps.dependency_container import di_container_instance
     from app.deps.dependency_factory import get_llm_client, get_mcp_client
     from app.services import embedding_service
-    from app.services.agents import build_graph
+    from app.services.agents import build_graph, build_monolithic_agent
     from app.tools.rag_tools import search_documents, list_uploaded_files, get_file_summary
 
     os.makedirs("uploads", exist_ok=True)
@@ -45,10 +45,14 @@ async def lifespan(app: FastAPI):
 
     rag_tools = [search_documents, list_uploaded_files, get_file_summary]
 
-    graph = build_graph(di_container_instance.llm_client, mcp_tools, rag_tools)
-    di_container_instance.agent_instance = graph
+    supervisor_graph = build_graph(di_container_instance.llm_client, mcp_tools, rag_tools)
+    monolithic_graph = build_monolithic_agent(di_container_instance.llm_client, mcp_tools, rag_tools)
+    # Single source of truth: both arms registered explicitly in the agent registry.
+    di_container_instance.register_agent("supervisor", supervisor_graph)
+    di_container_instance.register_agent("monolithic", monolithic_graph)
 
     logger.info("LangGraph Supervisor ready.")
+    logger.info("Monolithic ReAct agent ready.")
     yield
     logger.info("Shutting down.")
 
