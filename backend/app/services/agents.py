@@ -3,6 +3,7 @@ from datetime import date
 from typing import Literal
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import create_react_agent
@@ -126,12 +127,15 @@ def build_graph(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
 
     router_llm = llm.with_structured_output(RouteDecision)
 
-    async def supervisor_node(state: MessagesState) -> Command:
+    async def supervisor_node(state: MessagesState, config: RunnableConfig) -> Command:
+        # Forward the RunnableConfig so callbacks (e.g. the metrics handler) and
+        # run context propagate into the router and specialist LLM calls —
+        # required for accurate per-arm token/LLM-call accounting.
         # Only send the last few messages to the supervisor to keep context small
         recent = state["messages"][-6:]
         messages = [SystemMessage(content=SUPERVISOR_SYSTEM_PROMPT)] + recent
         try:
-            decision = await router_llm.ainvoke(messages)
+            decision = await router_llm.ainvoke(messages, config)
         except Exception as e:
             logger.error("Supervisor LLM error: %s", e)
             return Command(goto=END)
@@ -139,11 +143,11 @@ def build_graph(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
         goto = END if decision.next == "FINISH" else decision.next
         return Command(goto=goto)
 
-    async def call_tracking_agent(state: MessagesState) -> Command:
+    async def call_tracking_agent(state: MessagesState, config: RunnableConfig) -> Command:
         # Pass only the last human message so the agent's context stays bounded
         sub_state = {"messages": _last_human_message(state)}
         try:
-            result = await tracking_agent.ainvoke(sub_state)
+            result = await tracking_agent.ainvoke(sub_state, config)
             # Append only the final AI response (not intermediate tool calls)
             new_messages = [m for m in result["messages"] if isinstance(m, AIMessage)][-1:]
         except Exception as e:
@@ -151,21 +155,21 @@ def build_graph(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
             new_messages = [AIMessage(content=f"I encountered an error processing your request: {e}")]
         return Command(goto="supervisor", update={"messages": new_messages})
 
-    async def call_rag_agent(state: MessagesState) -> Command:
+    async def call_rag_agent(state: MessagesState, config: RunnableConfig) -> Command:
         sub_state = {"messages": _last_human_message(state)}
         try:
-            result = await rag_agent.ainvoke(sub_state)
+            result = await rag_agent.ainvoke(sub_state, config)
             new_messages = [m for m in result["messages"] if isinstance(m, AIMessage)][-1:]
         except Exception as e:
             logger.error("RAGAgent error: %s", e)
             new_messages = [AIMessage(content=f"I encountered an error searching documents: {e}")]
         return Command(goto="supervisor", update={"messages": new_messages})
 
-    async def call_general_agent(state: MessagesState) -> Command:
+    async def call_general_agent(state: MessagesState, config: RunnableConfig) -> Command:
         # Pass the last few messages so follow-ups and chitchat have conversational context
         sub_state = {"messages": _clean_messages_for_general(state["messages"][-6:])}
         try:
-            result = await general_agent.ainvoke(sub_state)
+            result = await general_agent.ainvoke(sub_state, config)
             new_messages = [m for m in result["messages"] if isinstance(m, AIMessage)][-1:]
         except Exception as e:
             logger.error("GeneralAgent error: %s", e)

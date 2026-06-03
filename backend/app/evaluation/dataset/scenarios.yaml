@@ -1,0 +1,850 @@
+# Golden Benchmark Dataset - annotated evaluation scenarios.
+#
+# This file is the rule-based correctness backbone of the thesis evaluation.
+# Every `expected` block is GROUND TRUTH that scored agent runs are compared
+# against. Tool names and arg keys are taken VERBATIM from the real tools:
+#   - MCP tracking tools : mcp_server/main.py (+ expenses/exercises tools.py)
+#   - RAG tools          : backend/app/tools/rag_tools.py
+#
+# DATE ANCHOR
+#   All relative dates ("today", "yesterday", "this week", "last week") are
+#   resolved against the fixed `reference_date` below and authored ALREADY
+#   RESOLVED in every args_expected. The loader does NOT do date math.
+#
+#   reference_date = 2026-06-03 (a Wednesday)
+#     today      = 2026-06-03
+#     yesterday  = 2026-06-02
+#     this week  = 2026-06-01 (Mon) .. 2026-06-07 (Sun)   [ISO week]
+#     last week  = 2026-05-25 (Mon) .. 2026-05-31 (Sun)
+#     last 7 days= 2026-05-27 .. 2026-06-03  (inclusive)
+#
+# NOTE for the USER: validate that these resolved dates and the chosen
+# week/period conventions match how your agent is prompted to reason. If your
+# agent uses a different week boundary (e.g. rolling 7 days vs ISO Mon-Sun),
+# adjust the start_date/end_date values here to match.
+
+reference_date: "2026-06-03"
+
+scenarios:
+  # ===========================================================================
+  # TRACKING (>=5)
+  # ===========================================================================
+  - id: track-log-expense-001
+    category: tracking
+    message: "I spent 12.50 BGN on a protein shake today, that's a fitness expense."
+    expected:
+      route: tracking
+      tool_calls:
+        - name: log_expense
+          args_expected:
+            amount: 12.5
+            category: "Fitness"
+            description: "Protein shake"
+            transaction_date: "2026-06-03"
+      no_write_expected: false
+      db_effect:
+        expenses_added: 1
+      reference_answer: >-
+        Logs a 12.50 fitness expense described as a protein shake dated
+        2026-06-03 and confirms it was saved.
+      answer_points:
+        - "Calls log_expense exactly once"
+        - "amount = 12.5"
+        - "category is Fitness"
+        - "transaction_date = 2026-06-03 (today)"
+        - "Confirms the expense was logged"
+
+  - id: track-log-expense-002
+    category: tracking
+    message: "Add an expense: 8 BGN for coffee yesterday under Food."
+    expected:
+      route: tracking
+      tool_calls:
+        - name: log_expense
+          args_expected:
+            amount: 8.0
+            category: "Food"
+            description: "Coffee"
+            transaction_date: "2026-06-02"
+      db_effect:
+        expenses_added: 1
+      reference_answer: >-
+        Logs an 8 BGN Food expense for coffee dated 2026-06-02 (yesterday).
+      answer_points:
+        - "Calls log_expense once"
+        - "amount = 8.0"
+        - "category is Food"
+        - "transaction_date = 2026-06-02 (yesterday)"
+
+  - id: track-log-exercise-001
+    category: tracking
+    message: "Log a 30 minute cardio run for today."
+    expected:
+      route: tracking
+      tool_calls:
+        - name: log_exercise
+          args_expected:
+            exercise_name: "Running"
+            category: "Cardio"
+            workout_date: "2026-06-03"
+            duration_minutes: 30
+      db_effect:
+        workouts_added: 1
+      reference_answer: >-
+        Logs a 30-minute cardio running workout dated 2026-06-03.
+      answer_points:
+        - "Calls log_exercise once"
+        - "category is Cardio"
+        - "duration_minutes = 30"
+        - "workout_date = 2026-06-03 (today)"
+
+  - id: track-spending-summary-001
+    category: tracking
+    message: "How much did I spend on Food this week?"
+    setup:
+      expenses:
+        - amount: 10.0
+          category: "Food"
+          description: "Lunch"
+          transaction_date: "2026-06-01"
+        - amount: 15.0
+          category: "Food"
+          description: "Groceries"
+          transaction_date: "2026-06-03"
+        - amount: 40.0
+          category: "Fitness"
+          description: "Gym shoes"
+          transaction_date: "2026-06-02"
+    expected:
+      route: tracking
+      # get_spending_summary returns totals by category for the range; an agent
+      # that instead calls get_expenses with category=Food is also acceptable,
+      # hence get_expenses is NOT forbidden. The primary scored call is the
+      # summary over this week's range.
+      tool_calls:
+        - name: get_spending_summary
+          args_expected:
+            start_date: "2026-06-01"
+            end_date: "2026-06-07"
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+      reference_answer: >-
+        Reports that 25 BGN was spent on Food this week (10 + 15), querying the
+        2026-06-01..2026-06-07 range. Does not modify any data.
+      answer_points:
+        - "Reads spending for the 2026-06-01..2026-06-07 range"
+        - "Reports Food total of 25 BGN"
+        - "Does not write to the database"
+
+  - id: track-get-expenses-001
+    category: tracking
+    message: "Show me all my Fitness expenses this week."
+    setup:
+      expenses:
+        - amount: 40.0
+          category: "Fitness"
+          description: "Gym shoes"
+          transaction_date: "2026-06-02"
+        - amount: 12.5
+          category: "Fitness"
+          description: "Protein shake"
+          transaction_date: "2026-06-03"
+        - amount: 10.0
+          category: "Food"
+          description: "Lunch"
+          transaction_date: "2026-06-01"
+    expected:
+      route: tracking
+      tool_calls:
+        - name: get_expenses
+          args_expected:
+            start_date: "2026-06-01"
+            end_date: "2026-06-07"
+            category: "Fitness"
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+      reference_answer: >-
+        Lists the two Fitness expenses in the 2026-06-01..2026-06-07 range
+        (gym shoes 40, protein shake 12.50). Read-only.
+      answer_points:
+        - "Calls get_expenses with category Fitness"
+        - "Range is 2026-06-01..2026-06-07"
+        - "Returns the two Fitness items, not the Food one"
+        - "No write"
+
+  - id: track-relog-expense-001
+    category: tracking
+    message: >-
+      I logged my lunch as 10 BGN but it was actually 14. Delete the old one and
+      add the corrected amount.
+    setup:
+      expenses:
+        - amount: 10.0
+          category: "Food"
+          description: "Lunch"
+          transaction_date: "2026-06-03"
+          ref: wrong_lunch
+    expected:
+      route: tracking
+      # Correcting requires deleting the seeded (wrong) expense by its id then
+      # logging the corrected one. The delete here is an explicit user-requested
+      # correction, so delete_expense is expected (not forbidden).
+      tool_calls:
+        - name: delete_expense
+          args_expected:
+            expense_id: "<ref:wrong_lunch>"
+        - name: log_expense
+          args_expected:
+            amount: 14.0
+            category: "Food"
+            description: "Lunch"
+            transaction_date: "2026-06-03"
+      db_effect:
+        expenses_unchanged: true   # net count unchanged: -1 then +1
+      reference_answer: >-
+        Deletes the incorrect 10 BGN lunch expense and logs a corrected 14 BGN
+        Food lunch expense for 2026-06-03.
+      answer_points:
+        - "Deletes the wrong expense by its id"
+        - "Logs a new expense with amount 14.0"
+        - "category stays Food, date stays 2026-06-03"
+
+  # ===========================================================================
+  # RAG (>=5) - grounded in docs/nutrition_guidelines.txt and gym_membership.txt
+  # File seed rows carry the doc text in extracted_text; file_ids reference the
+  # seeded file via its ref handle (resolved to a UUID by the harness/seeder).
+  # ===========================================================================
+  - id: rag-factual-protein-001
+    category: rag
+    file_ids:
+      - "<ref:nutrition_doc>"
+    message: "What is my daily protein target on training days according to my documents?"
+    setup:
+      files:
+        - original_name: "nutrition_guidelines.txt"
+          ref: nutrition_doc
+          extracted_text: |
+            Daily protein target: Aim for 1.6 grams of protein per kilogram of
+            body weight on training days. Hydration: drink at least 2.5 litres
+            of water per day. Recommended weekly training volume: at least 150
+            minutes of moderate cardio per week across at least three sessions.
+    expected:
+      route: rag
+      tool_calls:
+        - name: search_documents
+          args_expected:
+            query: "daily protein target training days"
+            file_ids:
+              - "<ref:nutrition_doc>"
+      no_write_expected: true
+      reference_answer: >-
+        States the protein target is 1.6 grams per kilogram of body weight on
+        training days, grounded in the nutrition document.
+      answer_points:
+        - "Searches the documents"
+        - "Answer is 1.6 g protein per kg body weight"
+        - "Mentions training days"
+        - "Grounded in the document, not invented"
+
+  - id: rag-factual-hydration-001
+    category: rag
+    file_ids:
+      - "<ref:nutrition_doc>"
+    message: "How much water should I drink per day based on my nutrition document?"
+    setup:
+      files:
+        - original_name: "nutrition_guidelines.txt"
+          ref: nutrition_doc
+          extracted_text: |
+            Hydration: Drink at least 2.5 litres of water per day. Add 500 ml
+            for every hour of intense exercise.
+    expected:
+      route: rag
+      tool_calls:
+        - name: search_documents
+          args_expected:
+            query: "daily water intake hydration"
+            file_ids:
+              - "<ref:nutrition_doc>"
+      no_write_expected: true
+      reference_answer: >-
+        States at least 2.5 litres per day, plus 500 ml per hour of intense
+        exercise, grounded in the document.
+      answer_points:
+        - "Searches the documents"
+        - "Answer is at least 2.5 litres per day"
+        - "May mention +500 ml per hour of exercise"
+
+  - id: rag-summarise-001
+    category: rag
+    file_ids:
+      - "<ref:gym_doc>"
+    message: "Summarise the gym membership tiers from my documents."
+    setup:
+      files:
+        - original_name: "gym_membership.txt"
+          ref: gym_doc
+          extracted_text: |
+            Membership tiers: Basic 35 BGN per month (weights area only);
+            Standard 55 BGN per month (adds group classes and swimming pool);
+            Premium 85 BGN per month (adds a monthly personal trainer session).
+    expected:
+      route: rag
+      # Canonical tool = get_file_summary. If alternative-tool acceptance is
+      # desired, handle it in the Phase 4 scorer, not here.
+      tool_calls:
+        - name: get_file_summary
+          args_expected:
+            file_id: "<ref:gym_doc>"
+      no_write_expected: true
+      reference_answer: >-
+        Summarises the three tiers: Basic 35, Standard 55, Premium 85 BGN/month,
+        with their respective benefits. Grounded in the gym document.
+      answer_points:
+        - "Reads the file via get_file_summary"
+        - "Lists Basic 35, Standard 55, Premium 85"
+        - "Associates tiers with their benefits"
+
+  - id: rag-factual-cancellation-001
+    category: rag
+    file_ids:
+      - "<ref:gym_doc>"
+    message: "How much notice do I need to give to cancel my gym membership?"
+    setup:
+      files:
+        - original_name: "gym_membership.txt"
+          ref: gym_doc
+          extracted_text: |
+            Cancellation policy: Memberships can be cancelled with 30 days
+            written notice. No cancellation fee applies after the first 3 months.
+    expected:
+      route: rag
+      tool_calls:
+        - name: search_documents
+          args_expected:
+            query: "gym membership cancellation notice period"
+            file_ids:
+              - "<ref:gym_doc>"
+      no_write_expected: true
+      reference_answer: >-
+        States 30 days written notice are required to cancel, grounded in the
+        gym document.
+      answer_points:
+        - "Searches the documents"
+        - "Answer is 30 days written notice"
+
+  - id: rag-not-in-document-001
+    category: rag
+    file_ids:
+      - "<ref:gym_doc>"
+    message: "Does my gym offer a student discount? Check my documents."
+    setup:
+      files:
+        - original_name: "gym_membership.txt"
+          ref: gym_doc
+          extracted_text: |
+            Membership tiers: Basic 35, Standard 55, Premium 85 BGN per month.
+            Cancellation requires 30 days written notice. This document does NOT
+            mention any student discount or any free trial period.
+    expected:
+      route: rag
+      # The agent MUST search and then truthfully report that the document does
+      # not contain this information. It MUST NOT fabricate a discount.
+      tool_calls:
+        - name: search_documents
+          args_expected:
+            query: "student discount"
+            file_ids:
+              - "<ref:gym_doc>"
+      no_write_expected: true
+      reference_answer: >-
+        Reports that the document does not mention any student discount and does
+        NOT invent one.
+      answer_points:
+        - "Searches the documents"
+        - "Says the document does not contain student-discount information"
+        - "Does NOT fabricate a discount or percentage"
+
+  # ===========================================================================
+  # GENERAL (>=5) - route general, no tool use. forbidden_tools = all
+  # write/query tools so any tool call is a failure.
+  # ===========================================================================
+  - id: general-greeting-001
+    category: general
+    message: "Hey there! How are you doing today?"
+    expected:
+      route: general
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+        - get_expenses
+        - delete_expense
+        - get_spending_summary
+        - log_exercise
+        - get_workouts
+        - delete_exercise
+        - get_workout_summary
+        - search_documents
+        - list_uploaded_files
+        - get_file_summary
+      no_write_expected: true
+      reference_answer: >-
+        Responds with a friendly greeting and offers to help. No tools used.
+      answer_points:
+        - "Friendly conversational reply"
+        - "No tool calls"
+        - "May offer to help with tracking or documents"
+
+  - id: general-definition-001
+    category: general
+    message: "What does the term 'progressive overload' mean in strength training?"
+    expected:
+      route: general
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+        - get_expenses
+        - delete_expense
+        - get_spending_summary
+        - log_exercise
+        - get_workouts
+        - delete_exercise
+        - get_workout_summary
+        - search_documents
+        - list_uploaded_files
+        - get_file_summary
+      no_write_expected: true
+      reference_answer: >-
+        Explains progressive overload as gradually increasing training stress
+        (weight, reps, or volume) over time. General knowledge, no tools.
+      answer_points:
+        - "Defines progressive overload correctly"
+        - "No tool calls"
+
+  - id: general-explanation-001
+    category: general
+    message: "Can you explain the difference between aerobic and anaerobic exercise?"
+    expected:
+      route: general
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+        - get_expenses
+        - delete_expense
+        - get_spending_summary
+        - log_exercise
+        - get_workouts
+        - delete_exercise
+        - get_workout_summary
+        - search_documents
+        - list_uploaded_files
+        - get_file_summary
+      no_write_expected: true
+      reference_answer: >-
+        Explains aerobic (with oxygen, endurance) vs anaerobic (short, intense,
+        without sustained oxygen) exercise. No tools.
+      answer_points:
+        - "Distinguishes aerobic vs anaerobic correctly"
+        - "No tool calls"
+
+  - id: general-followup-001
+    category: general
+    history:
+      - role: user
+        content: "Can you explain what BMI is?"
+      - role: assistant
+        content: "BMI (Body Mass Index) is weight in kg divided by height in metres squared."
+    message: "And what is considered a healthy range?"
+    expected:
+      route: general
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+        - get_expenses
+        - delete_expense
+        - get_spending_summary
+        - log_exercise
+        - get_workouts
+        - delete_exercise
+        - get_workout_summary
+        - search_documents
+        - list_uploaded_files
+        - get_file_summary
+      no_write_expected: true
+      reference_answer: >-
+        Answers the follow-up that a healthy BMI is roughly 18.5 to 24.9, using
+        conversation context. No tools.
+      answer_points:
+        - "Uses prior turn context (BMI)"
+        - "States healthy range approx 18.5-24.9"
+        - "No tool calls"
+
+  - id: general-capability-001
+    category: general
+    message: "What kinds of things can you help me with?"
+    expected:
+      route: general
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+        - get_expenses
+        - delete_expense
+        - get_spending_summary
+        - log_exercise
+        - get_workouts
+        - delete_exercise
+        - get_workout_summary
+        - search_documents
+        - list_uploaded_files
+        - get_file_summary
+      no_write_expected: true
+      reference_answer: >-
+        Describes its capabilities (tracking expenses and workouts, answering
+        questions about uploaded documents, general Q&A). No tools.
+      answer_points:
+        - "Describes capabilities at a high level"
+        - "No tool calls"
+
+  # ===========================================================================
+  # MULTI_DOMAIN (>=5) - advisor's exact examples + extras. Order matters where
+  # logical (write/log before the read that depends on it).
+  # ===========================================================================
+  - id: multi-expense-and-summary-001
+    category: multi_domain
+    message: >-
+      Log that I spent 25 BGN on food today and show me how much I've spent on
+      restaurants this week.
+    setup:
+      expenses:
+        - amount: 30.0
+          category: "Food"
+          description: "Restaurant dinner"
+          transaction_date: "2026-06-01"
+    expected:
+      route: tracking
+      tool_calls:
+        - name: log_expense
+          args_expected:
+            amount: 25.0
+            category: "Food"
+            transaction_date: "2026-06-03"
+        - name: get_spending_summary
+          args_expected:
+            start_date: "2026-06-01"
+            end_date: "2026-06-07"
+      db_effect:
+        expenses_added: 1
+      reference_answer: >-
+        First logs a 25 BGN Food expense for today, then reports this week's
+        food/restaurant spending (the new 25 plus the seeded 30 = 55 BGN) over
+        2026-06-01..2026-06-07.
+      answer_points:
+        - "Logs the 25 BGN Food expense for 2026-06-03 first"
+        - "Then queries spending for the week range"
+        - "Reports the food/restaurant total including the new entry"
+
+  - id: multi-workout-and-compare-001
+    category: multi_domain
+    message: >-
+      Add a 45-minute running workout and tell me whether I trained more this
+      week than last.
+    setup:
+      workouts:
+        - workout_date: "2026-05-26"
+          exercise_name: "Running"
+          category: "Cardio"
+          duration_minutes: 30
+        - workout_date: "2026-06-02"
+          exercise_name: "Cycling"
+          category: "Cardio"
+          duration_minutes: 20
+    expected:
+      route: tracking
+      tool_calls:
+        - name: log_exercise
+          args_expected:
+            exercise_name: "Running"
+            category: "Cardio"
+            workout_date: "2026-06-03"
+            duration_minutes: 45
+        - name: get_workout_summary
+          args_expected:
+            start_date: "2026-06-01"
+            end_date: "2026-06-07"
+        - name: get_workout_summary
+          args_expected:
+            start_date: "2026-05-25"
+            end_date: "2026-05-31"
+      db_effect:
+        workouts_added: 1
+      reference_answer: >-
+        Logs a 45-minute running workout for today, then compares this week's
+        total duration (20 seeded + 45 new = 65 min) against last week's
+        (30 min) and reports that this week is more.
+      answer_points:
+        - "Logs the 45-minute Running cardio workout first"
+        - "Queries this-week and last-week ranges"
+        - "Concludes this week > last week"
+
+  - id: multi-rag-and-workouts-001
+    category: multi_domain
+    file_ids:
+      - "<ref:nutrition_doc>"
+    message: >-
+      Find the nutrition recommendations in my documents and compare them with
+      my workouts from the last 7 days.
+    setup:
+      files:
+        - original_name: "nutrition_guidelines.txt"
+          ref: nutrition_doc
+          extracted_text: |
+            Recommended weekly training volume: at least 150 minutes of moderate
+            cardio per week, split across at least three sessions.
+      workouts:
+        - workout_date: "2026-05-29"
+          exercise_name: "Running"
+          category: "Cardio"
+          duration_minutes: 40
+        - workout_date: "2026-06-01"
+          exercise_name: "Cycling"
+          category: "Cardio"
+          duration_minutes: 50
+    expected:
+      route: rag
+      tool_calls:
+        - name: search_documents
+          args_expected:
+            query: "nutrition recommendations weekly training volume"
+            file_ids:
+              - "<ref:nutrition_doc>"
+        - name: get_workouts
+          args_expected:
+            start_date: "2026-05-27"
+            end_date: "2026-06-03"
+      no_write_expected: true
+      reference_answer: >-
+        Retrieves the recommendation of at least 150 minutes of cardio per week,
+        reads the last-7-days workouts (40 + 50 = 90 minutes), and notes the
+        user is below the recommended volume.
+      answer_points:
+        - "Searches the documents for the recommendation (150 min/week)"
+        - "Reads workouts for 2026-05-27..2026-06-03"
+        - "Compares actual (90 min) against the recommendation"
+        - "No write"
+
+  - id: multi-expense-and-workout-001
+    category: multi_domain
+    message: >-
+      Log 60 BGN for new running shoes today under Fitness, and log a 5 km run
+      for today too.
+    expected:
+      route: tracking
+      tool_calls:
+        - name: log_expense
+          args_expected:
+            amount: 60.0
+            category: "Fitness"
+            description: "Running shoes"
+            transaction_date: "2026-06-03"
+        - name: log_exercise
+          args_expected:
+            exercise_name: "Running"
+            category: "Cardio"
+            workout_date: "2026-06-03"
+            distance_km: 5.0
+      db_effect:
+        expenses_added: 1
+        workouts_added: 1
+      reference_answer: >-
+        Logs a 60 BGN Fitness expense for running shoes and a 5 km running
+        workout, both dated 2026-06-03.
+      answer_points:
+        - "Logs the 60 BGN Fitness expense"
+        - "Logs a 5 km running workout"
+        - "Both dated today (2026-06-03)"
+
+  - id: multi-summary-both-domains-001
+    category: multi_domain
+    message: >-
+      Give me a quick recap of this week: how much I spent in total and how long
+      I worked out.
+    setup:
+      expenses:
+        - amount: 20.0
+          category: "Food"
+          description: "Groceries"
+          transaction_date: "2026-06-02"
+      workouts:
+        - workout_date: "2026-06-02"
+          exercise_name: "Running"
+          category: "Cardio"
+          duration_minutes: 35
+    expected:
+      route: tracking
+      tool_calls:
+        - name: get_spending_summary
+          args_expected:
+            start_date: "2026-06-01"
+            end_date: "2026-06-07"
+        - name: get_workout_summary
+          args_expected:
+            start_date: "2026-06-01"
+            end_date: "2026-06-07"
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+      reference_answer: >-
+        Reports this week's total spending (20 BGN) and total workout duration
+        (35 minutes), both over 2026-06-01..2026-06-07. Read-only.
+      answer_points:
+        - "Queries spending summary for the week"
+        - "Queries workout summary for the week"
+        - "Reports both totals"
+        - "No write"
+
+  # ===========================================================================
+  # AMBIGUOUS / EDGE (>=5) - advisor's exact examples.
+  # ===========================================================================
+  - id: ambiguous-missing-category-001
+    category: ambiguous
+    message: "Log 20 BGN for yesterday."
+    # DEFAULT (authored): the category is missing, so the agent should ASK
+    # rather than guess -> clarification_expected + no_write_expected.
+    #
+    # ALTERNATIVE: if you decide a sanctioned default category is acceptable,
+    # the expected flips to a single log_expense call:
+    #     tool_calls:
+    #       - name: log_expense
+    #         args_expected: {amount: 20.0, category: "Other", transaction_date: "2026-06-02"}
+    #     clarification_expected: false
+    #     no_write_expected: false
+    #     db_effect: {expenses_added: 1}
+    expected:
+      route: tracking
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+      clarification_expected: true
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+      reference_answer: >-
+        Asks the user which category the 20 BGN expense belongs to before
+        logging anything. Does not write.
+      answer_points:
+        - "Recognises the category is missing"
+        - "Asks a clarifying question for the category"
+        - "Does NOT call log_expense"
+
+  - id: ambiguous-missing-exercise-001
+    category: ambiguous
+    message: "Log a workout, 1 hour."
+    expected:
+      route: tracking
+      tool_calls: []
+      forbidden_tools:
+        - log_exercise
+      clarification_expected: true
+      no_write_expected: true
+      db_effect:
+        workouts_unchanged: true
+      reference_answer: >-
+        Asks what type of exercise / which movement to log (duration alone is
+        not enough). Does not write.
+      answer_points:
+        - "Recognises the exercise type/name is missing"
+        - "Asks a clarifying question"
+        - "Does NOT call log_exercise"
+
+  - id: ambiguous-delete-last-001
+    category: ambiguous
+    message: "Delete my last expense."
+    setup:
+      expenses:
+        - amount: 18.0
+          category: "Food"
+          description: "Takeaway"
+          transaction_date: "2026-06-03"
+          ref: last_expense
+    expected:
+      route: tracking
+      # Deletion is risky: the agent must CONFIRM before deleting, so
+      # delete_expense MUST NOT be called in this turn.
+      tool_calls: []
+      forbidden_tools:
+        - delete_expense
+      confirmation_expected: true
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+      reference_answer: >-
+        The agent must NOT delete without explicit user confirmation. It MAY
+        read/identify the last expense first (the 18 BGN Food takeaway), but it
+        must ask the user to confirm before deleting and must NOT delete in this
+        turn.
+      answer_points:
+        - "Does NOT call delete_expense without confirmation"
+        - "Asks the user to confirm the deletion"
+        - "The seeded expense remains in the database"
+
+  - id: ambiguous-period-coffee-001
+    category: ambiguous
+    message: "How much have I spent on coffee?"
+    # No period given -> default to clarification. The agent must NOT invent a
+    # total. An acceptable alternative behaviour is answering while explicitly
+    # stating an assumed period; the default scored expectation is clarify.
+    setup:
+      expenses:
+        - amount: 4.0
+          category: "Food"
+          description: "Coffee"
+          transaction_date: "2026-05-20"
+        - amount: 4.5
+          category: "Food"
+          description: "Coffee"
+          transaction_date: "2026-06-02"
+    expected:
+      route: tracking
+      tool_calls: []
+      # The failure mode is the agent inventing a date range and querying instead
+      # of asking which period -- so any query tool here is forbidden; it must
+      # clarify first.
+      forbidden_tools:
+        - get_expenses
+        - get_spending_summary
+      clarification_expected: true
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+      reference_answer: >-
+        Asks which time period to consider (no period was specified) before
+        reporting a coffee total. Does not hallucinate a number.
+      answer_points:
+        - "Recognises the time period is unspecified"
+        - "Asks which period to use (or states an explicit assumed period)"
+        - "Does NOT invent a coffee total"
+
+  - id: ambiguous-vague-good-day-001
+    category: ambiguous
+    message: "Track that I had a good day."
+    # Nothing concrete to log (no amount, no exercise, no document query).
+    expected:
+      route: tracking
+      tool_calls: []
+      forbidden_tools:
+        - log_expense
+        - log_exercise
+      clarification_expected: true
+      no_write_expected: true
+      db_effect:
+        expenses_unchanged: true
+        workouts_unchanged: true
+      reference_answer: >-
+        Asks what specifically to track (an expense, a workout, etc.), since the
+        request has no loggable detail. Does not write.
+      answer_points:
+        - "Recognises there is nothing concrete to log"
+        - "Asks the user to specify what to track"
+        - "Does NOT call any write tool"

@@ -1,0 +1,29 @@
+Personal Nutrition Guidelines (Sample Document)
+
+This is a small self-contained reference document used by the RAG evaluation
+scenarios. The facts below are the ground truth that "search the document"
+scenarios are scored against. Swap this content for your own if you wish, but
+update the matching RAG scenarios in scenarios.yaml accordingly.
+
+1. Daily protein target
+   Aim for 1.6 grams of protein per kilogram of body weight on training days.
+
+2. Hydration
+   Drink at least 2.5 litres of water per day. Add 500 ml for every hour of
+   intense exercise.
+
+3. Pre-workout meal
+   Eat a meal containing complex carbohydrates roughly 2 hours before training.
+   A good example is oatmeal with banana.
+
+4. Post-workout window
+   Consume protein and carbohydrates within 45 minutes after finishing a
+   workout to support recovery.
+
+5. Recommended weekly training volume
+   Perform at least 150 minutes of moderate cardio per week, split across at
+   least three sessions.
+
+Note: This document does NOT contain any information about supplements,
+medication dosages, or specific brand recommendations. Questions about those
+topics cannot be answered from this document.

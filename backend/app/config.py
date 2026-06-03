@@ -77,7 +77,11 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: EmailStr | None = None
     EMAILS_FROM_NAME: str | None = None
 
-
+    # Gemini token pricing per 1,000 tokens, used by the thesis evaluation layer
+    # to estimate per-run cost. User-supplied defaults (input $0.50/1M,
+    # output $3.00/1M); both are overridable via environment variables.
+    PRICE_IN_PER_1K: float = 0.0005
+    PRICE_OUT_PER_1K: float = 0.003
 
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:

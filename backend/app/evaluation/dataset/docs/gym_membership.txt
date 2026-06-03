@@ -1,0 +1,21 @@
+FitZone Gym Membership Terms (Sample Document)
+
+This is a small self-contained reference document used by the RAG evaluation
+scenarios. The facts below are the ground truth that "search the document"
+scenarios are scored against.
+
+Membership tiers:
+  - Basic:    35 BGN per month. Access to the weights area only.
+  - Standard: 55 BGN per month. Adds group classes and the swimming pool.
+  - Premium:  85 BGN per month. Adds a monthly session with a personal trainer.
+
+Opening hours:
+  - Weekdays:  06:00 to 23:00
+  - Weekends:  08:00 to 20:00
+
+Cancellation policy:
+  Memberships can be cancelled with 30 days written notice. No cancellation fee
+  applies after the first 3 months.
+
+Note: This document does NOT mention any student discount or any free trial
+period. Questions about those topics cannot be answered from this document.

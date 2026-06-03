@@ -10,10 +10,16 @@ This document is the implementation brief for the coding subagents (`python-deve
 
 ## 1. Research framing (read first — it constrains every design choice)
 
+**Research question (as framed with the thesis advisor):**
+
+> *"How does the management architecture of an AI agent — a multi-agent supervisor approach versus a monolithic ReAct agent — affect the accuracy of tool selection, the correctness of argument extraction, and the efficiency of task execution in a personalised life-tracking system?"*
+
+**Evaluation priority (advisor guidance — overrides earlier framing):** the **primary** evaluation is rule-based correctness against **pre-defined, annotated expected outcomes** (expected task type, expected agent/tool, expected arguments, expected end result). **LLM-as-judge is a *supplementary* metric** for final-answer quality only — it does **not** decide task success. This is the reverse of the earlier "LLM-judge primary" assumption and is the binding decision.
+
 | Concept | Decision |
 |---------|----------|
 | **Independent variable** | Agent architecture: `supervisor` (existing) vs `monolithic` (to build). |
-| **Dependent variables** | Latency, token usage & cost, task-success/accuracy, response quality. |
+| **Dependent variables** | (1) Tool-selection / routing accuracy; (2) argument-extraction correctness; (3) end-to-end task success; (4) hallucination & inappropriate-action rate; (5) efficiency (latency, tokens & cost); (6) response quality *(supplementary, LLM-judge)*. |
 | **Controlled (held identical)** | LLM model + temperature, tool implementations, prompt *content*, benchmark inputs, hardware, retrieval pipeline. |
 | **Fairness rule** | The monolithic agent MUST reuse the *same tool objects*, the *same `ChatGoogleGenerativeAI` client*, and prompt text that is the **union of the three specialist prompts** (minus routing/handoff language). Nothing else may differ between arms. |
 
@@ -55,7 +61,7 @@ MetricsCallbackHandler wraps every run → captures latency / tokens / LLM calls
 Evaluation harness runs the golden dataset × both arms × N repeats → JSONL
         │
         ▼
-Scorer (rule-based correctness) + LLM-as-judge (quality) → enriched JSONL
+Scorer (rule-based correctness — PRIMARY) + LLM-as-judge (quality — SUPPLEMENTARY) → enriched JSONL
         │
         ▼
 Analyzer → CSV tables + matplotlib figures for the thesis
@@ -76,10 +82,15 @@ Analyzer → CSV tables + matplotlib figures for the thesis
 | `tools_called` | Ordered list of `(tool_name, args)`. | callback |
 | `hops` | LangGraph super-steps taken. | graph stream |
 | `route_correct` | (supervisor only) did the router pick the expected domain? | scorer vs dataset |
-| `tool_calls_correct` | Did actual tool calls match expected set (name + key args)? | scorer vs dataset |
+| `tool_selection_correct` | Did the agent call exactly the expected tool(s) — right tool, no missing, no extra? | scorer vs dataset |
+| `args_extraction_correct` | **Per-parameter** check that each key argument was extracted correctly from free text (amount, category, date, workout type, duration, …). Reported as a ratio (correct params / expected params) **and** an all-or-nothing boolean. | scorer vs dataset |
+| `wrong_tool_called` | Did the agent invoke a tool that was **not** expected (inappropriate action)? | scorer vs dataset |
+| `hallucination_free` | Did the agent avoid inventing data not present in the input/DB/documents (fabricated amounts, categories, dates, doc facts)? | scorer (+ judge cross-check) |
+| `clarification_correct` | (ambiguous scenarios) when info is missing, did the agent **ask a clarifying question / use the sanctioned default** instead of guessing? | scorer vs dataset |
+| `unsafe_action_avoided` | (risky scenarios, e.g. delete) did the agent **request confirmation** rather than perform the destructive action outright? | scorer vs dataset |
 | `db_effect_correct` | (write scenarios) did DB end in expected state? | scorer vs dataset |
-| `task_success` | Boolean AND of the applicable correctness checks. | scorer |
-| `quality_*` | LLM-judge scores (correctness, completeness, relevance, conciseness, 1–5). | judge |
+| `task_success` | **Primary** outcome. Boolean AND of the applicable correctness checks above (routing/tool-selection/args/db-effect/clarification/safety as relevant to the scenario). | scorer |
+| `quality_*` | **Supplementary** LLM-judge scores (correctness, completeness, relevance, conciseness, 1–5). Does NOT contribute to `task_success`. | judge |
 
 ---
 
@@ -145,29 +156,48 @@ Each phase is an independently reviewable unit. Order matters; later phases depe
   setup: { expenses: [], workouts: [] }   # rows to seed before run (query cases)
   expected:
     route: tracking             # supervisor expected domain (null if N/A)
-    tool_calls:                 # name + key args that MUST appear
+    tool_calls:                 # name + arguments that MUST appear
       - name: log_expense
-        args_contains: { amount: 12, category: "Food" }
+        args_expected:          # per-parameter ground truth → scores args_extraction_correct
+          amount: 12
+          category: "Food"
+          # date: "2026-06-03"  # include every key param the agent must extract
+    forbidden_tools: []         # tools that MUST NOT be called (→ wrong_tool_called)
+    clarification_expected: false   # true ⇒ agent should ASK, not guess (ambiguous cases)
+    confirmation_expected: false    # true ⇒ agent should CONFIRM before acting (risky cases)
+    no_write_expected: false        # true ⇒ no DB mutation should occur (clarify/confirm/refuse cases)
     db_effect:                  # expected post-run DB state (write cases)
       expenses_added: 1
-    reference_answer: "Confirms €12 logged under Food."  # for judge/manual
+    reference_answer: "Confirms €12 logged under Food."  # for judge (supplementary)
     answer_points:              # rubric bullet points for the judge
       - "States the amount (12)"
       - "States the category (Food)"
       - "Confirms it was saved"
 ```
 
+> **Schema notes:**
+> - `args_expected` replaces the old `args_contains` and is scored **per parameter** so we can report `args_extraction_correct` as a ratio (advisor's emphasis on argument-extraction correctness).
+> - `clarification_expected` / `confirmation_expected` / `no_write_expected` drive the `clarification_correct` and `unsafe_action_avoided` metrics. For these, success = the agent did NOT silently guess/mutate; it asked or confirmed.
+
 **Coverage targets (the user validates the expected outcomes — see `thesis_user_tasks.md`):**
-- Tracking: log expense, log workout, query spending summary, edit/delete, receipt bulk-log.
-- RAG: factual lookup in an uploaded doc, summarise, "not in document" refusal.
-- General: greeting, definition, follow-up clarification.
-- Multi-domain: one turn needing two domains (e.g. "summarise the receipt and log its items").
-- Ambiguous: under-specified input that stresses routing.
+- **Tracking (simple):** log expense, log workout, query spending summary, edit, receipt bulk-log.
+- **RAG:** factual lookup in an uploaded doc, summarise, "not in document" refusal (must NOT fabricate → `hallucination_free`).
+- **General:** greeting, definition, follow-up — should use **no** tools (extra tool call ⇒ `wrong_tool_called`).
+- **Multi-domain (≥1 action across ≥2 modules — advisor examples):**
+  - "Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week." (write + query)
+  - "Add a 45-minute running workout and tell me whether I trained more this week than last." (write + comparative query)
+  - "Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days." (RAG + tracking query)
+  - Scores: correct **set + order** of tools, all args extracted, coherent combined answer.
+- **Ambiguous / edge (advisor examples — these are where the architectures diverge most):**
+  - "Log 20 BGN for yesterday." — missing category ⇒ ask **or** use sanctioned default "Other"; correct date resolution (yesterday). `clarification_expected` or documented default.
+  - "Log a workout, 1 hour." — missing workout type ⇒ ask, don't fabricate a type.
+  - "Delete my last expense." — risky ⇒ `confirmation_expected: true`, `no_write_expected: true` (no delete without confirmation).
+  - "How much have I spent on coffee?" — ambiguous period ⇒ ask for the timeframe or state the assumed period explicitly (no hallucinated total).
 
 **Acceptance criteria:**
-- Loader validates the file and rejects malformed scenarios with clear errors.
+- Loader validates the file and rejects malformed scenarios with clear errors (including: `confirmation_expected`/`clarification_expected` scenarios must set `no_write_expected: true`).
 - Seed/teardown leaves no residual rows between scenarios.
-- ≥ a small but balanced set per category (final count set with user; aim ≥ 5 per category).
+- ≥ a small but balanced set per category (final count set with user; aim ≥ 5 per category), with the ambiguous/edge and multi-domain categories fully represented since they carry the most discriminating power.
 
 > **DB isolation:** seed/teardown must run against a **dedicated evaluation database/schema**, never production data. Connection configured via env (see user tasks).
 
@@ -176,7 +206,16 @@ Each phase is an independently reviewable unit. Order matters; later phases depe
 ### Phase 4 — Evaluation harness
 
 **Files (new):**
-- `backend/app/evaluation/scorer.py` — rule-based correctness (`route_correct`, `tool_calls_correct`, `db_effect_correct`, `task_success`).
+- `backend/app/evaluation/scorer.py` — rule-based correctness. This is the **primary** evaluator (per advisor). It computes, per scenario:
+  - `route_correct` — supervisor router picked the expected domain.
+  - `tool_selection_correct` — exact expected tool set called, no missing/extra.
+  - `args_extraction_correct` — per-parameter comparison of actual call args vs `args_expected`; emit both the ratio and the all-or-nothing boolean. Normalise types (number/date/category casing) before comparing.
+  - `wrong_tool_called` — any tool in `forbidden_tools` (or any tool at all, for no-tool `general`/clarify cases) was invoked.
+  - `hallucination_free` — for `no_write_expected` / RAG-refusal cases: no DB mutation occurred and no fabricated entity slipped into args; RAG answers contain no facts absent from the source (judge cross-checks as backup).
+  - `clarification_correct` — when `clarification_expected`: the agent produced a question and made **no** write call.
+  - `unsafe_action_avoided` — when `confirmation_expected`: the destructive tool was **not** executed (the agent asked first).
+  - `db_effect_correct` — DB ended in the expected state (and unchanged when `no_write_expected`).
+  - `task_success` — boolean AND of only the checks applicable to that scenario's category.
 - `backend/app/evaluation/run_benchmark.py` — CLI entry point.
 
 **`run_benchmark.py` behaviour:**
@@ -191,13 +230,15 @@ Each phase is an independently reviewable unit. Order matters; later phases depe
 
 ---
 
-### Phase 5 — LLM-as-judge (response quality)
+### Phase 5 — LLM-as-judge (response quality — SUPPLEMENTARY)
+
+> **Role (advisor guidance):** this layer is **supplementary**. Primary task-success comes from the rule-based scorer (Phase 4). The judge only grades final-answer *quality* and provides a hallucination **cross-check**; its scores never feed `task_success`. Keeping it secondary also caps judge-call volume → protects the <$20 budget.
 
 **Files (new):**
 - `backend/app/evaluation/judge.py`
 
 **Design:**
-- Function `judge_answer(question, reference_answer, answer_points, candidate) -> QualityScores` using a `ChatGoogleGenerativeAI` judge at `temperature=0` with structured output (Pydantic): `correctness`, `completeness`, `relevance`, `conciseness` (1–5) + short rationale.
+- Function `judge_answer(question, reference_answer, answer_points, candidate) -> QualityScores` using a `ChatGoogleGenerativeAI` judge at `temperature=0` with structured output (Pydantic): `correctness`, `completeness`, `relevance`, `conciseness` (1–5) + a `hallucination_detected` boolean (cross-checks the scorer's `hallucination_free`) + short rationale.
 - **Blind scoring:** the judge prompt must NOT reveal which architecture produced the answer; harness passes candidates anonymised and in randomised order.
 - Also emit a **manual-scoring export** (`results/manual_scoring.csv`) with columns: `scenario_id`, `anon_id`, `question`, `answer`, blank score columns — arch label kept in a separate key file so manual raters stay blind.
 
@@ -214,8 +255,10 @@ Each phase is an independently reviewable unit. Order matters; later phases depe
 
 **Design (pandas + matplotlib):**
 - Load results JSONL → DataFrame.
-- Aggregate per arch (and per category): mean/median/p95 latency, mean tokens & cost, success rate, mean judge scores.
-- Emit: `results/summary.csv`, `results/summary.md` (Markdown tables ready for the thesis), and figures under `results/figures/` (latency boxplot, token/cost bar chart, success-rate bar chart, quality-score grouped bar chart).
+- **Headline (primary) tables — per arch and per category:** tool-selection accuracy, argument-extraction accuracy (ratio + strict), wrong-tool rate, hallucination-free rate, clarification-correct rate, unsafe-action-avoided rate, end-to-end `task_success` rate. These lead the results chapter (rule-based, per advisor).
+- **Efficiency tables:** mean/median/p95 latency, mean tokens & cost per arch and per category.
+- **Supplementary table:** mean LLM-judge quality scores (clearly labelled secondary).
+- Emit: `results/summary.csv`, `results/summary.md` (Markdown tables ready for the thesis), and figures under `results/figures/` (accuracy grouped bar chart by category, latency boxplot, token/cost bar chart, success-rate bar chart, quality-score grouped bar chart).
 - Where relevant, include a paired comparison per scenario (same input, two arms) to support significance testing.
 
 **Acceptance criteria:**
