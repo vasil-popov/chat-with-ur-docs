@@ -1,0 +1,6 @@
+metric,supervisor,monolithic
+Correctness (1-5),3.78,4.25
+Completeness (1-5),3.84,4.37
+Relevance (1-5),4.57,4.95
+Conciseness (1-5),4.62,4.85
+Hallucination detected (judge),32/130 (24.6%),40/130 (30.8%)

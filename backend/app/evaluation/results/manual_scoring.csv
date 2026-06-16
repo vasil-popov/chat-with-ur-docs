@@ -1,0 +1,1077 @@
+anon_id,question,answer,correctness,completeness,relevance,conciseness,notes
+a001,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a002,Show me all my Fitness expenses this week.,"You have two fitness expenses for this week:
+- **June 2, 2026**: $40.00 for Gym shoes
+- **June 3, 2026**: $12.50 for a Protein shake",,,,,
+a003,And what is considered a healthy range?,"For most adults, a BMI between **18.5 and 24.9** is considered the healthy weight range.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool. It doesn't directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a004,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" from today.",,,,,
+a005,Log 20 BGN for yesterday.,"OK. I've logged an expense of 20.00 BGN for yesterday (June 2nd) under the ""General"" category.",,,,,
+a006,Track that I had a good day.,"That's great to hear! I'm glad you had a good day.
+
+Since I mainly track fitness and finances, would you like to log anything specific to commemorate it? For example, we could record a celebration dinner as an expense or a great workout session. Otherwise, I've noted the positive vibes!",,,,,
+a007,What kinds of things can you help me with?,"I can help you with a wide range of general tasks! Here are a few examples:
+
+*   **General Knowledge:** Answering questions about history, science, or trivia.
+*   **Writing & Editing:** Helping you draft emails, stories, or polish your writing.
+*   **Brainstorming:** Coming up with gift ideas, meal plans, or travel itineraries.
+*   **Problem Solving:** Explaining complex concepts or helping with basic math and logic.
+*   **Chitchat:** Just having a friendly conversation!
+
+If you need to **log expenses**, **track workouts**, or **search your uploaded documents**, just let me know. I’ll hand those specific requests off to my specialist colleagues who handle those areas!",,,,,
+a008,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the practice of gradually increasing the intensity, volume, or difficulty of your workouts over time. Since your body adapts to the stress you put on it, you have to keep challenging it to continue seeing gains in strength or muscle size.
+
+Common ways to apply it include:
+
+*   **Increasing weight:** Lifting heavier loads than you did previously.
+*   **Increasing volume:** Adding more repetitions or sets to an exercise.
+*   **Decreasing rest:** Shortening the time between sets to increase intensity.
+*   **Improving technique:** Performing the same exercise with better control or a greater range of motion.
+
+It’s essentially the ""secret sauce"" to making long-term progress in the gym!",,,,,
+a009,"Log a workout, 1 hour.","What did you do for your workout? Just let me know the exercise name (like Running or Weightlifting) and the category, and I'll get that logged for you!",,,,,
+a010,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for you.,,,,,
+a011,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"I've logged your 25 BGN expense for food today.
+
+For this week (June 1st – June 7th), you have spent a total of **55.00 BGN** in the Food category. This includes:
+*   **30.00 BGN** for a ""Restaurant dinner"" on June 1st.
+*   **25.00 BGN** for ""Food"" today.",,,,,
+a012,Delete my last expense.,"OK. I've deleted your last expense: $18.00 for ""Takeaway"" on 2026-06-03.",,,,,
+a013,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"Based on your documents (specifically `nutrition_guidelines.txt`) and your workout history from the last 7 days (May 28 – June 3), here is how your activity compares to the recommendations:
+
+### **Nutrition & Training Recommendations**
+*   **Protein:** Aim for **1.6g of protein per kg** of body weight on training days.
+*   **Hydration:** Drink at least **2.5 liters** of water per day.
+*   **Cardio Goal:** At least **150 minutes** of moderate cardio per week across at least **three sessions**.
+
+### **Your Activity (Last 7 Days)**
+You logged **2 cardio sessions** totaling **90 minutes**:
+*   **May 29:** Running (40 minutes)
+*   **June 1:** Cycling (50 minutes)
+
+### **Comparison**
+*   **Frequency:** You completed **2 sessions**, which is 1 session short of the recommended 3 per week.
+*   **Duration:** You logged **90 minutes**, meaning you are **60 minutes short** of the 150-minute weekly goal.
+*   **Nutrition Tip:** Since you had two training days, ensure you hit your protein target (1.6g/kg) on May 29 and June 1 to support recovery.",,,,,
+a014,What is my daily protein target on training days according to my documents?,"According to your **nutrition_guidelines.txt**, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a015,Log 20 BGN for yesterday.,,,,,,
+a016,Add a 45-minute running workout and tell me whether I trained more this week than last.,"OK. I've logged your 45-minute run for today.
+
+So far this week, you've trained for a total of **65 minutes**, which is more than the **30 minutes** you logged all of last week. Great job!",,,,,
+a017,Track that I had a good day., Just let me know the details!,,,,,
+a018,Track that I had a good day., Just let me know the details!,,,,,
+a019,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"Based on your documents and workout history from the last 7 days (May 28 – June 3), here is how your activity compares to your nutrition and training guidelines:
+
+### **Nutrition & Training Recommendations**
+*(Source: `nutrition_guidelines.txt`)*
+*   **Protein:** Aim for 1.6g of protein per kg of body weight on training days.
+*   **Hydration:** Drink at least 2.5 liters of water daily.
+*   **Cardio Goal:** At least 150 minutes of moderate cardio per week across at least three sessions.
+
+### **Your Activity (Last 7 Days)**
+You logged **2 cardio sessions** totaling **90 minutes**:
+*   **May 29:** Running (40 minutes)
+*   **June 1:** Cycling (50 minutes)
+
+### **Comparison**
+*   **Cardio Volume:** You are currently at 90 minutes and 2 sessions. To meet your weekly goal of 150 minutes across 3 sessions, you need **one more session of at least 60 minutes**.
+*   **Nutrition Tip:** Since May 29 and June 1 were training days, ensure you hit your protein target (1.6g/kg) on those dates to support recovery.",,,,,
+a020,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the fundamental principle of strength training that involves gradually increasing the stress placed on the body during exercise. 
+
+The goal is to continually challenge your musculoskeletal system so that it is forced to adapt, resulting in gains in muscle size, strength, and endurance. If you keep the weight and intensity the same indefinitely, your body will eventually plateau because it has already adapted to that specific workload.
+
+### How to implement it:
+You can achieve progressive overload by adjusting several variables:
+
+*   **Resistance:** Increasing the weight you are lifting (e.g., moving from 50lb to 55lb).
+*   **Volume:** Increasing the total number of repetitions or sets.
+*   **Frequency:** Increasing how often you train a specific muscle group.
+*   **Intensity:** Decreasing rest time between sets or increasing the speed/tempo of the lift.
+*   **Range of Motion:** Performing the exercise through a greater distance to increase the work done.
+
+In short: to get stronger, you have to make your workouts harder over time.",,,,,
+a021,How much notice do I need to give to cancel my gym membership?,"To cancel your gym membership, you must provide **30 days written notice**. 
+
+Additionally, no cancellation fee applies if you cancel after the first 3 months of your membership.
+
+**Source:**
+* gym_membership.txt",,,,,
+a022,What is my daily protein target on training days according to my documents?,"According to your **nutrition_guidelines.txt** document, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a023,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a024,Summarise the gym membership tiers from my documents.,"Based on the document **gym_membership.txt**, here are the available membership tiers:
+
+*   **Basic:** 35 BGN per month (includes weights area only).
+*   **Standard:** 55 BGN per month (includes weights area, group classes, and swimming pool).
+*   **Premium:** 85 BGN per month (includes all Standard features plus one monthly personal trainer session).",,,,,
+a025,Does my gym offer a student discount? Check my documents.,"Based on your **gym_membership.txt** document, there is no mention of a student discount. It only lists the following membership tiers:
+
+*   **Basic:** 35 BGN/month
+*   **Standard:** 55 BGN/month
+*   **Premium:** 85 BGN/month",,,,,
+a026,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a027,How much notice do I need to give to cancel my gym membership?,"According to your gym membership agreement (`gym_membership.txt`), you need to provide **30 days written notice** to cancel. 
+
+Additionally, there is no cancellation fee if you have been a member for at least 3 months.",,,,,
+a028,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the practice of gradually increasing the intensity of your workouts over time to keep making gains in strength, muscle, and endurance.
+
+Since your body adapts to the stress you put on it, you have to continually challenge it to see progress. You can achieve this in several ways:
+
+*   **Increasing weight:** Lifting heavier than you did in previous sessions.
+*   **Adding volume:** Doing more repetitions or sets of an exercise.
+*   **Increasing frequency:** Training a muscle group more often.
+*   **Decreasing rest time:** Doing the same amount of work in less time.
+*   **Improving form:** Performing the same movement with better control or a greater range of motion.
+
+It’s the fundamental principle behind almost every successful strength training program!",,,,,
+a029,How much did I spend on Food this week?,You've spent a total of **$25.00** on Food so far this week.,,,,,
+a030,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"I've logged your 25 BGN expense for food today.
+
+Regarding your spending on **restaurants** this week (June 1st – June 3rd):
+You currently have **0.00 BGN** recorded under the ""Restaurants"" category. However, you have spent a total of **30.00 BGN** in the ""Food"" category so far this week.",,,,,
+a031,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for new running shoes and your 5 km run for today.,,,,,
+a032,How much notice do I need to give to cancel my gym membership?,"According to your gym membership agreement (`gym_membership.txt`), you need to provide **30 days written notice** to cancel. 
+
+Additionally, there is no cancellation fee if you have been a member for at least 3 months.",,,,,
+a033,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake.,,,,,
+a034,How much water should I drink per day based on my nutrition document?,"Based on your **nutrition_guidelines.txt** document, you should drink at least **2.5 litres of water per day**. Additionally, you should add 500 ml for every hour of intense exercise.",,,,,
+a035,How much water should I drink per day based on my nutrition document?,"Based on your **nutrition_guidelines.txt** document, you should drink at least **2.5 litres** of water per day. It also recommends adding an extra **500 ml** for every hour of intense exercise.",,,,,
+a036,Log 20 BGN for yesterday.,"I've noted the 20 BGN expense for yesterday (2026-06-02). Could you please tell me what the **category** (e.g., Food, Transport) and **description** (e.g., Lunch, Bus ticket) should be?",,,,,
+a037,Log 20 BGN for yesterday.,"I've noted the 20 BGN expense for yesterday (2026-06-02). Could you please tell me what the **category** (e.g., Food, Transport) and **description** (e.g., Lunch, Bus ticket) should be?",,,,,
+a038,How much have I spent on coffee?,"You have spent a total of $8.50 on coffee. Here are the details:
+
+*   **May 20, 2026:** $4.00
+*   **June 2, 2026:** $4.50",,,,,
+a039,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for you.,,,,,
+a040,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake today.,,,,,
+a041,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"OK. I've logged your 25 BGN expense for food today.
+
+Regarding your spending on **restaurants** this week (June 1st – June 3rd), you haven't recorded any expenses under that specific category yet. However, you have spent a total of **55.00 BGN** in the **Food** category so far this week.",,,,,
+a042,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"I've logged your 25 BGN expense for food today.
+
+Regarding your restaurant spending for this week (starting Monday, June 1st): you haven't recorded any expenses under the ""Restaurants"" category yet. Your only recorded spending in a related category is 30 BGN for ""Food"".",,,,,
+a043,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between the two is how your body produces energy during the activity.
+
+**Aerobic Exercise (""With Oxygen"")**
+*   **What it is:** Steady, rhythmic activities that you can sustain for a long period.
+*   **How it works:** Your heart and lungs work together to provide a continuous supply of oxygen to your muscles to create energy.
+*   **Examples:** Jogging, swimming, cycling, or brisk walking.
+*   **Benefit:** Improves cardiovascular endurance and overall heart health.
+
+**Anaerobic Exercise (""Without Oxygen"")**
+*   **What it is:** Short, intense bursts of activity where your body’s demand for oxygen exceeds the immediate supply.
+*   **How it works:** Your body breaks down glucose stores for energy without relying on inhaled oxygen. This can only be sustained for a few seconds to a couple of minutes.
+*   **Examples:** Sprinting, heavy weightlifting, or high-intensity interval training (HIIT).
+*   **Benefit:** Builds muscle mass, strength, and power.
+
+A simple way to remember it: **Aerobic** is for endurance (like a marathon), while **anaerobic** is for power (like a 100m dash).",,,,,
+a044,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a045,How much did I spend on Food this week?,You've spent a total of **$25.00** on Food so far this week (from June 1st to June 3rd).,,,,,
+a046,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a047,Track that I had a good day.,"I'm glad to hear you had a good day! Would you like to log something specific to celebrate? 
+
+For example, I can:
+* **Log a celebratory meal or treat** as an expense.
+* **Record a great workout** you completed.
+
+Just let me know the details!",,,,,
+a048,Summarise the gym membership tiers from my documents.,"The gym membership tiers are as follows:
+
+*   **Basic:** 35 BGN per month, includes access to the weights area only.
+*   **Standard:** 55 BGN per month, includes access to the weights area, group classes, and the swimming pool.
+*   **Premium:** 85 BGN per month, includes all Standard benefits plus one personal trainer session per month.
+
+**Source:** `gym_membership.txt`",,,,,
+a049,How much did I spend on Food this week?,You've spent a total of **$25.00** on Food so far this week.,,,,,
+a050,How much notice do I need to give to cancel my gym membership?,"According to your gym membership agreement (`gym_membership.txt`), you need to provide **30 days written notice** to cancel. 
+
+Additionally, there is no cancellation fee if you have been a member for at least 3 months.",,,,,
+a051,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged that 8 BGN coffee expense for you under Food for yesterday, June 2nd.",,,,,
+a052,What kinds of things can you help me with?,"I can help you with a wide range of general tasks! Here are a few examples:
+
+*   **General Knowledge:** Answering questions about history, science, geography, and more.
+*   **Writing & Editing:** Helping you draft emails, stories, or refine your writing.
+*   **Brainstorming:** Coming up with gift ideas, meal plans, or travel itineraries.
+*   **Problem Solving:** Assisting with math problems, logic puzzles, or explaining complex topics.
+*   **Chitchat:** Just having a friendly conversation!
+
+If you need to log expenses, track workouts, or search through your uploaded documents, let me know and I’ll hand you off to a specialist who can help with those specific tasks. 
+
+How can I help you today?",,,,,
+a053,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee. 
+
+Here are the details:
+*   **$4.00** on May 20, 2026
+*   **$4.50** on June 2, 2026",,,,,
+a054,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake today.,,,,,
+a055,How much notice do I need to give to cancel my gym membership?,"To cancel your gym membership, you must provide **30 days written notice**. 
+
+Additionally, no cancellation fee applies if you have been a member for more than three months (Source: gym_membership.txt).",,,,,
+a056,Summarise the gym membership tiers from my documents.,"The gym membership tiers are as follows:
+
+*   **Basic:** 35 BGN per month, includes access to the weights area only.
+*   **Standard:** 55 BGN per month, includes weights, group classes, and the swimming pool.
+*   **Premium:** 85 BGN per month, includes all Standard features plus one personal trainer session per month.
+
+**Source:** `gym_membership.txt`",,,,,
+a057,Add a 45-minute running workout and tell me whether I trained more this week than last.,"OK. I've logged your 45-minute run for today.
+
+Comparing your training:
+*   **This week (Jun 1 – Jun 7):** 65 minutes total.
+*   **Last week (May 25 – May 31):** 30 minutes total.
+
+You've trained more this week than last week! Great job!",,,,,
+a058,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between the two comes down to how your body uses oxygen to produce energy.
+
+**Aerobic Exercise (""With Oxygen"")**
+*   **What it is:** Sustained, rhythmic activity that increases your heart rate for a longer period.
+*   **How it works:** Your body uses a steady supply of oxygen to burn fat and carbohydrates for energy.
+*   **Examples:** Jogging, swimming, cycling, or brisk walking.
+*   **Benefit:** Improves cardiovascular health and builds endurance.
+
+**Anaerobic Exercise (""Without Oxygen"")**
+*   **What it is:** Short, intense bursts of activity where the demand for oxygen exceeds the supply.
+*   **How it works:** Your body breaks down glucose stores in the muscles because it can't get oxygen fast enough to fuel the movement.
+*   **Examples:** Sprinting, heavy weightlifting, or high-intensity interval training (HIIT).
+*   **Benefit:** Builds muscle mass, strength, and power.
+
+In short: **Aerobic** is for endurance and ""steady-state"" cardio, while **Anaerobic** is for power and high-intensity strength.",,,,,
+a059,How much did I spend on Food this week?,You've spent a total of $25.00 on Food so far this week.,,,,,
+a060,What kinds of things can you help me with?,"I can help you manage your daily life across three main areas:
+
+1.  **Finance & Fitness Tracking:** I can log your expenses (like groceries or bills) and your workouts (sets, reps, or cardio). I can also provide summaries of your spending or exercise history over any time period.
+2.  **Document Q&A:** If you upload files, I can search through them to answer specific questions, summarize content, or find details buried in your documents.
+3.  **General Assistance:** I can answer general knowledge questions, help with writing, or just chat.
+
+Is there something specific you'd like to start with?",,,,,
+a061,Hey there! How are you doing today?,"I'm doing great, thank you for asking! How can I help you today?",,,,,
+a062,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that fitness expense of 12.50 BGN for your protein shake.,,,,,
+a063,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake today.,,,,,
+a064,How much water should I drink per day based on my nutrition document?,"According to your nutrition document, you should drink at least **2.5 litres of water per day**. Additionally, you should add 500 ml for every hour of intense exercise.
+
+Source: `nutrition_guidelines.txt`",,,,,
+a065,What is my daily protein target on training days according to my documents?,"According to the **nutrition_guidelines.txt** document, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a066,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for running shoes and your 5 km run for today.,,,,,
+a067,Hey there! How are you doing today?,"I'm doing great, thank you for asking! How can I help you today?",,,,,
+a068,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st to June 3rd), here is your recap:
+
+*   **Total Spending:** You've spent **$20.00** (all in the Food category).
+*   **Workout Time:** You've worked out for a total of **35 minutes**.",,,,,
+a069,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake.,,,,,
+a070,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" entry from today.",,,,,
+a071,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between aerobic and anaerobic exercise lies in how your body uses oxygen and energy during the activity.
+
+### **Aerobic Exercise (With Oxygen)**
+Aerobic means ""with oxygen."" During these activities, your breathing and heart rate increase for a sustained period. Your body uses oxygen to break down glucose and fat for fuel.
+*   **Intensity:** Low to moderate.
+*   **Duration:** Long (usually 20 minutes or more).
+*   **Benefits:** Improves cardiovascular health, builds endurance, and burns fat.
+*   **Examples:** Running, swimming, cycling, brisk walking, and rowing.
+
+### **Anaerobic Exercise (Without Oxygen)**
+Anaerobic means ""without oxygen."" These are short, intense bursts of activity where the demand for oxygen exceeds the supply. Instead of oxygen, your body breaks down glucose stores (glycogen) in the muscles for immediate energy.
+*   **Intensity:** High.
+*   **Duration:** Short (seconds to a few minutes).
+*   **Benefits:** Builds muscle mass, increases strength, and boosts power and speed.
+*   **Examples:** Sprinting, heavy weightlifting, High-Intensity Interval Training (HIIT), and plyometrics.
+
+**In short:** If you can maintain the pace for a long time while breathing steadily, it’s likely **aerobic**. If you’re working so hard that you’re out of breath in a matter of seconds, it’s **anaerobic**.",,,,,
+a072,Add a 45-minute running workout and tell me whether I trained more this week than last.,"I've logged your 45-minute running workout for today.
+
+Comparing your training:
+*   **This week:** You've completed **65 minutes** of exercise (including today's run and a 20-minute cycling session yesterday).
+*   **Last week:** You completed **30 minutes** of exercise.
+
+You've already trained more this week than you did all of last week! Great job.",,,,,
+a073,How much have I spent on coffee?,"You have spent a total of $8.50 on coffee so far this year. 
+
+Here are the details:
+*   **May 20, 2026:** $4.00
+*   **June 2, 2026:** $4.50",,,,,
+a074,How much did I spend on Food this week?,You've spent a total of $25.00 on Food so far this week.,,,,,
+a075,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged the 60 BGN expense for your new running shoes and recorded your 5 km run for today.,,,,,
+a076,How much notice do I need to give to cancel my gym membership?,"Based on your gym membership agreement (`gym_membership.txt`), you need to provide **30 days written notice** to cancel. 
+
+Additionally, there is no cancellation fee if you have been a member for at least 3 months.",,,,,
+a077,Show me all my Fitness expenses this week.,"You have two fitness expenses for this week:
+
+*   **June 2, 2026:** Gym shoes ($40.00)
+*   **June 3, 2026:** Protein shake ($12.50)",,,,,
+a078,How much water should I drink per day based on my nutrition document?,"According to your nutrition document, you should drink at least **2.5 litres of water per day**. Additionally, you should add 500 ml for every hour of intense exercise.
+
+Source: *nutrition_guidelines.txt*",,,,,
+a079,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for you.,,,,,
+a080,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"I encountered an error searching documents: Recursion limit of 15 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",,,,,
+a081,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between aerobic and anaerobic exercise lies in how your body uses oxygen and energy during the activity.
+
+### **Aerobic Exercise (""With Oxygen"")**
+Aerobic exercise is any activity that increases your heart rate and breathing for an extended period. During these activities, your body uses oxygen to break down glucose and fat for energy.
+*   **Intensity:** Low to moderate.
+*   **Duration:** Long (usually 20 minutes or more).
+*   **Goal:** Improves cardiovascular endurance and heart health.
+*   **Examples:** Running, swimming, cycling, brisk walking, and rowing.
+
+### **Anaerobic Exercise (""Without Oxygen"")**
+Anaerobic exercise involves short, intense bursts of activity. Because the intensity is so high, your body cannot deliver oxygen to your muscles fast enough to produce energy. Instead, it relies on energy sources stored directly in the muscles (like glycogen).
+*   **Intensity:** High.
+*   **Duration:** Short (seconds to a few minutes).
+*   **Goal:** Builds muscle mass, strength, and power.
+*   **Examples:** Sprinting, heavy weightlifting, High-Intensity Interval Training (HIIT), and plyometrics.
+
+**In short:** If you can maintain the pace for a long time while breathing steadily, it’s likely **aerobic**. If you’re ""out of breath"" and can only keep it up for a few seconds or minutes, it’s **anaerobic**.",,,,,
+a082,Show me all my Fitness expenses this week.,"You have two fitness expenses for this week:
+
+*   **June 2, 2026:** $40.00 for Gym shoes
+*   **June 3, 2026:** $12.50 for a Protein shake",,,,,
+a083,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"So far this week, you've spent a total of **$20.00** (all on Food) and have worked out for a total of **35 minutes**.",,,,,
+a084,Show me all my Fitness expenses this week.,"You have two fitness expenses recorded for this week:
+
+*   **June 2, 2026:** Gym shoes ($40.00)
+*   **June 3, 2026:** Protein shake ($12.50)",,,,,
+a085,What does the term 'progressive overload' mean in strength training?,"**Progressive overload** is the fundamental principle of strength training that involves gradually increasing the stress placed on the body during exercise. 
+
+The goal is to continually challenge your musculoskeletal system so that it is forced to adapt, resulting in increased strength, muscle mass, and endurance. If you keep doing the same workout with the same weights and intensity, your body will eventually plateau because it has already adapted to that specific workload.
+
+### How to apply it:
+You can achieve progressive overload by adjusting several variables:
+*   **Resistance:** Increasing the weight (e.g., moving from 50kg to 52.5kg on a bench press).
+*   **Volume:** Increasing the total number of repetitions or sets.
+*   **Frequency:** Increasing how often you train a specific muscle group.
+*   **Intensity/Density:** Decreasing rest time between sets or performing the same work in less time.
+*   **Form/Tempo:** Improving your technique or slowing down the movement to increase ""time under tension.""
+
+In short: to get stronger, you have to make your workouts harder over time.",,,,,
+a086,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee so far this year.
+
+Here are the details:
+*   **May 20, 2026:** $4.00
+*   **June 2, 2026:** $4.50",,,,,
+a087,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for you.,,,,,
+a088,What kinds of things can you help me with?,"I can help you stay organized across a few different areas:
+
+*   **Finance Tracking:** I can log your expenses, categorize them, and provide summaries of your spending over time.
+*   **Fitness Tracking:** I can record your workouts, including specific exercises, sets, reps, and cardio metrics, and give you progress reports.
+*   **Document Q&A:** If you upload documents, I can search through them to answer your questions and provide summaries of their content.
+*   **General Assistance:** I'm also here for general knowledge questions, quick calculations, or just to chat.
+
+Is there something specific you'd like to start with?",,,,,
+a089,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st to June 3rd), here is your recap:
+
+*   **Total Spending:** $20.00 (all in the **Food** category).
+*   **Total Workout Time:** 35 minutes.",,,,,
+a090,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the gradual increase of stress placed upon the body during exercise. In simple terms, it means you have to make your workouts more challenging over time to keep seeing results in strength, muscle size, or endurance.
+
+If you do the exact same workout every day, your body eventually adapts and plateaus. To keep improving, you can apply progressive overload by:
+
+*   **Increasing weight:** Lifting heavier than you did before.
+*   **Increasing volume:** Doing more repetitions or sets.
+*   **Increasing frequency:** Training a muscle group more often.
+*   **Decreasing rest:** Taking shorter breaks between sets to increase intensity.
+
+It’s the fundamental principle behind most successful training programs!",,,,,
+a091,What is my daily protein target on training days according to my documents?,"According to your **nutrition_guidelines.txt**, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a092,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"I encountered an error searching documents: Recursion limit of 15 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",,,,,
+a093,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake today.,,,,,
+a094,Show me all my Fitness expenses this week.,"You have two fitness expenses recorded for this week:
+
+*   **June 2, 2026:** Gym shoes - $40.00
+*   **June 3, 2026:** Protein shake - $12.50",,,,,
+a095,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+It's worth noting that BMI is a general screening tool and doesn't directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a096,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool. It doesn’t account for muscle mass, bone density, or overall body composition, so it may not be perfectly accurate for athletes or older adults.",,,,,
+a097,Does my gym offer a student discount? Check my documents.,"Based on the document **gym_membership.txt**, there is no mention of a student discount. The document only lists the membership tiers (Basic, Standard, and Premium) and the cancellation policy.",,,,,
+a098,What is my daily protein target on training days according to my documents?,"According to the **nutrition_guidelines.txt** document, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a099,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between aerobic and anaerobic exercise lies in how your body uses oxygen and energy during the activity.
+
+### **Aerobic Exercise (With Oxygen)**
+Aerobic means ""with oxygen."" During these activities, your breathing and heart rate increase for a sustained period. Your body uses oxygen to break down glucose and fat for fuel.
+*   **Intensity:** Low to moderate.
+*   **Duration:** Long (usually 20 minutes or more).
+*   **Benefits:** Improves cardiovascular health, builds endurance, and burns fat.
+*   **Examples:** Running, swimming, cycling, brisk walking, and rowing.
+
+### **Anaerobic Exercise (Without Oxygen)**
+Anaerobic means ""without oxygen."" These are short, intense bursts of activity where the demand for oxygen exceeds the supply. Instead of oxygen, your body breaks down glucose stores (glycogen) in the muscles for immediate energy.
+*   **Intensity:** High.
+*   **Duration:** Short (seconds to a few minutes).
+*   **Benefits:** Builds muscle mass, increases strength, and boosts power and speed.
+*   **Examples:** Sprinting, heavy weightlifting, High-Intensity Interval Training (HIIT), and plyometrics.
+
+**In short:** If you can maintain the pace for a long time while breathing steadily, it’s likely **aerobic**. If you’re working so hard that you’re out of breath in a matter of seconds, it’s **anaerobic**.",,,,,
+a100,Hey there! How are you doing today?,"I'm doing great, thank you for asking! How can I help you today?",,,,,
+a101,What does the term 'progressive overload' mean in strength training?,"**Progressive overload** is the fundamental principle of strength training that involves gradually increasing the stress placed on the body during exercise. 
+
+The goal is to continually challenge your musculoskeletal system so that it is forced to adapt, resulting in increased strength, muscle mass, and endurance. If you keep doing the same workout with the same weights and intensity, your body will eventually plateau because it has already adapted to that specific workload.
+
+### How to apply it:
+You can achieve progressive overload by adjusting several variables:
+*   **Resistance:** Increasing the weight (e.g., moving from 50kg to 52.5kg on a bench press).
+*   **Volume:** Increasing the total number of repetitions or sets.
+*   **Frequency:** Increasing how often you train a specific muscle group.
+*   **Intensity/Density:** Decreasing rest time between sets or performing the same work in less time.
+*   **Form/Tempo:** Improving your technique or slowing down the movement to increase ""time under tension.""
+
+In short: to get stronger, you have to make your workouts harder over time.",,,,,
+a102,Does my gym offer a student discount? Check my documents.,"Based on your gym membership document (`gym_membership.txt`), there is no mention of a student discount. It only lists the following membership tiers:
+
+*   **Basic:** 35 BGN/month
+*   **Standard:** 55 BGN/month
+*   **Premium:** 85 BGN/month",,,,,
+a103,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference comes down to how your body uses oxygen to produce energy.
+
+**Aerobic Exercise (""With Oxygen"")**
+*   **What it is:** Sustained, rhythmic activities that increase your heart rate for a longer period.
+*   **Energy source:** Your body uses a steady supply of oxygen to burn fat and carbohydrates.
+*   **Goals:** Improves cardiovascular endurance and lung health.
+*   **Examples:** Brisk walking, long-distance running, cycling, and swimming.
+
+**Anaerobic Exercise (""Without Oxygen"")**
+*   **What it is:** Short, intense bursts of activity where the demand for oxygen exceeds the supply.
+*   **Energy source:** Your body breaks down glucose stores in the muscles because it can't get oxygen fast enough.
+*   **Goals:** Builds muscle mass, strength, and power.
+*   **Examples:** Sprinting, heavy weightlifting, and high-intensity interval training (HIIT).
+
+In short: Aerobic is for endurance (slow and steady), while anaerobic is for power (fast and intense).",,,,,
+a104,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee.
+
+Here are the details:
+*   **$4.00** on 2026-05-20
+*   **$4.50** on 2026-06-02",,,,,
+a105,Hey there! How are you doing today?,"I'm doing great, thank you for asking! It's Wednesday, June 3rd, 2026, and I'm ready to help you with whatever you need—whether it's tracking your spending, logging a workout, or answering questions about your documents.
+
+How can I help you today?",,,,,
+a106,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee so far this year.
+
+Here are the details:
+*   **May 20, 2026:** $4.00
+*   **June 2, 2026:** $4.50",,,,,
+a107,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for new running shoes and your 5 km run for today.,,,,,
+a108,Show me all my Fitness expenses this week.,"You have two fitness expenses recorded for this week:
+
+*   **June 2, 2026:** Gym shoes - $40.00
+*   **June 3, 2026:** Protein shake - $12.50",,,,,
+a109,Does my gym offer a student discount? Check my documents.,"Based on your **gym_membership.txt** document, there is no mention of a student discount. It only lists the following membership tiers:
+
+*   **Basic:** 35 BGN/month
+*   **Standard:** 55 BGN/month
+*   **Premium:** 85 BGN/month
+
+The document also notes that cancellation requires 30 days' written notice.",,,,,
+a110,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the principle of gradually increasing the stress placed on your body during exercise. Since your muscles adapt to the work you give them, you have to consistently increase the challenge to continue seeing gains in strength, size, or endurance.
+
+Common ways to apply progressive overload include:
+
+*   **Increasing resistance:** Adding more weight to the bar or using a heavier dumbbell.
+*   **Increasing volume:** Doing more repetitions or adding extra sets.
+*   **Increasing frequency:** Training a muscle group more often.
+*   **Decreasing rest:** Shortening the break time between sets to increase intensity.
+
+Without it, your progress will eventually plateau because your body no longer has a reason to adapt!",,,,,
+a111,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a112,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st to June 3rd), here is your recap:
+
+*   **Total Spending:** $20.00 (all in the **Food** category).
+*   **Total Workout Time:** 35 minutes.",,,,,
+a113,How much did I spend on Food this week?,You spent a total of **$25.00** on Food so far this week.,,,,,
+a114,How much water should I drink per day based on my nutrition document?,"According to your nutrition document, you should drink at least **2.5 litres of water per day**. Additionally, you should add **500 ml** for every hour of intense exercise.
+
+Source: `nutrition_guidelines.txt`",,,,,
+a115,How much have I spent on coffee?,"You have spent a total of $8.50 on coffee so far this year. Here are the details:
+
+*   **May 20, 2026:** $4.00
+*   **June 2, 2026:** $4.50",,,,,
+a116,Log 20 BGN for yesterday.,"I've noted the amount (20 BGN) and the date (June 2nd, 2026). What was this expense for, and which category should I put it in (e.g., Food, Transport, Shopping)?",,,,,
+a117,Track that I had a good day.,"That's great to hear! I'm glad you're having a good one.
+
+While I don't have a dedicated ""mood tracker"" in my system, I can certainly help you log any specific highlights. Did you do a workout or treat yourself to something special that you'd like me to record in your fitness or expense logs?",,,,,
+a118,What is my daily protein target on training days according to my documents?,"According to the **nutrition_guidelines.txt** document, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a119,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" entry from today.",,,,,
+a120,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a121,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee. Here are the details:
+
+*   **$4.00** on 2026-05-20
+*   **$4.50** on 2026-06-02",,,,,
+a122,How much notice do I need to give to cancel my gym membership?,"To cancel your gym membership, you need to provide **30 days written notice**. Additionally, no cancellation fee applies if you have been a member for more than 3 months.
+
+Source: `gym_membership.txt`",,,,,
+a123,What kinds of things can you help me with?,"I can help you with a wide range of general tasks! Here are a few examples:
+
+*   **General Knowledge:** Answering questions about history, science, or trivia.
+*   **Writing & Editing:** Helping you draft emails, stories, or polish your writing.
+*   **Brainstorming:** Coming up with gift ideas, meal plans, or travel itineraries.
+*   **Problem Solving:** Explaining complex concepts or helping with basic math and logic.
+*   **Chitchat:** Just having a friendly conversation!
+
+If you need to **log expenses**, **track workouts**, or **search your uploaded documents**, just let me know. I’ll hand those specific requests off to my specialist colleagues who handle those areas!",,,,,
+a124,How much water should I drink per day based on my nutrition document?,"According to your **nutrition_guidelines.txt** document, you should drink at least **2.5 litres of water per day**. 
+
+It also recommends adding an extra **500 ml** for every hour of intense exercise.",,,,,
+a125,Summarise the gym membership tiers from my documents.,"The gym membership tiers are as follows:
+
+*   **Basic:** 35 BGN per month, providing access to the weights area only.
+*   **Standard:** 55 BGN per month, which includes access to the weights area, group classes, and the swimming pool.
+*   **Premium:** 85 BGN per month, which includes all Standard benefits plus one personal trainer session per month.
+
+**Source:** gym_membership.txt",,,,,
+a126,Summarise the gym membership tiers from my documents.,"Based on the document **gym_membership.txt**, here are the gym membership tiers:
+
+*   **Basic:** 35 BGN per month (includes access to the weights area only).
+*   **Standard:** 55 BGN per month (includes weights, group classes, and the swimming pool).
+*   **Premium:** 85 BGN per month (includes all Standard features plus one personal trainer session per month).",,,,,
+a127,Track that I had a good day.,"That's great to hear! I'm glad you had a good day.
+
+Since I mainly track fitness and finances, would you like to log anything specific to commemorate it? For example, we could record a celebration dinner as an expense or a great workout session. Otherwise, I've noted the positive vibes!",,,,,
+a128,What kinds of things can you help me with?,"I can help you manage your daily life across three main areas:
+
+1.  **Finance & Fitness Tracking:** I can log your expenses (like groceries or bills) and your workouts (sets, reps, or cardio). I can also provide summaries of your spending or exercise history over any time period.
+2.  **Document Q&A:** If you upload files, I can search through them to answer specific questions, summarize content, or find details buried in your documents.
+3.  **General Assistance:** I can answer general knowledge questions, help with writing, or just chat.
+
+Is there something specific you'd like to start with?",,,,,
+a129,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for your lunch today.,,,,,
+a130,"Log a workout, 1 hour.",,,,,,
+a131,How much notice do I need to give to cancel my gym membership?,"According to your **gym_membership.txt** file, you need to provide **30 days written notice** to cancel your membership. 
+
+Additionally, there is no cancellation fee if you have been a member for at least 3 months.",,,,,
+a132,Summarise the gym membership tiers from my documents.,"Based on the document **gym_membership.txt**, here are the gym membership tiers:
+
+*   **Basic:** 35 BGN per month (includes weights area only).
+*   **Standard:** 55 BGN per month (includes weights, group classes, and swimming pool).
+*   **Premium:** 85 BGN per month (includes all Standard features plus one monthly personal trainer session).",,,,,
+a133,Hey there! How are you doing today?,"I'm doing great, thank you for asking! It's Wednesday, June 3rd, 2026, and I'm ready to help you with whatever you need—whether it's tracking your spending, logging a workout, or looking something up in your documents.
+
+How can I help you today?",,,,,
+a134,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged an expense of 8 BGN for coffee under Food for yesterday, June 2nd.",,,,,
+a135,How much did I spend on Food this week?,You've spent a total of $25.00 on Food so far this week.,,,,,
+a136,How much water should I drink per day based on my nutrition document?,"Based on your **nutrition_guidelines.txt** document, you should drink at least **2.5 litres of water per day**. Additionally, you should add 500 ml for every hour of intense exercise.",,,,,
+a137,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"I encountered an error searching documents: Recursion limit of 15 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",,,,,
+a138,Add an expense: 8 BGN for coffee yesterday under Food.,OK. I've logged your 8 BGN coffee from yesterday under Food.,,,,,
+a139,Delete my last expense.,"OK. I've deleted your last expense: $18.00 for ""Takeaway"" on 2026-06-03.",,,,,
+a140,Does my gym offer a student discount? Check my documents.,"Based on your document **gym_membership.txt**, there is no mention of a student discount. It lists the following membership tiers:
+
+*   **Basic:** 35 BGN/month
+*   **Standard:** 55 BGN/month
+*   **Premium:** 85 BGN/month
+
+The document also notes that cancellation requires 30 days' written notice and does not mention any free trial periods.",,,,,
+a141,How much did I spend on Food this week?,You've spent a total of $25.00 on Food so far this week.,,,,,
+a142,And what is considered a healthy range?,"For most adults, a healthy BMI range is between **18.5 and 24.9**.
+
+Here is the general breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool. It doesn’t directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a143,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for running shoes and your 5 km run for today.,,,,,
+a144,What is my daily protein target on training days according to my documents?,"According to the **nutrition_guidelines.txt** document, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a145,Track that I had a good day.,"That's great to hear! I'm glad you're having a good one.
+
+While I don't have a dedicated ""mood tracker"" in my system, I can certainly help you log any specific highlights. Did you do a workout or treat yourself to something special that you'd like me to record in your fitness or expense logs?",,,,,
+a146,Hey there! How are you doing today?,"I'm doing great, thank you for asking! How are things going with you? Is there anything I can help you with today?",,,,,
+a147,Show me all my Fitness expenses this week.,"You have two fitness expenses recorded for this week:
+
+*   **June 2nd:** $40.00 for Gym shoes
+*   **June 3rd:** $12.50 for a Protein shake",,,,,
+a148,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a149,Track that I had a good day.,"That's great to hear! I'm glad you had a good day.
+
+Since I mainly track your **finances**, **fitness**, and **documents**, would you like to log anything specific to commemorate it? For example, did you treat yourself to a nice meal or hit a new personal best at the gym?",,,,,
+a150,Log 20 BGN for yesterday.,"OK. I've logged an expense of 20.00 BGN under ""General"" for yesterday, June 2nd.",,,,,
+a151,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged that 8 BGN coffee expense for you under Food for yesterday, June 2nd.",,,,,
+a152,How much did I spend on Food this week?,You've spent a total of **$25.00** on Food so far this week.,,,,,
+a153,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"So far this week (June 1st – June 3rd), you've spent a total of **$20.00** (all on Food) and worked out for a total of **35 minutes**.",,,,,
+a154,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee. 
+
+Here are the details:
+*   **$4.00** on 2026-05-20
+*   **$4.50** on 2026-06-02",,,,,
+a155,What is my daily protein target on training days according to my documents?,"According to your **nutrition_guidelines.txt**, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a156,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"Based on your documents and workout history from the last 7 days (May 28 – June 3), here is how your activity compares to your nutrition and training guidelines:
+
+### **Nutrition & Training Recommendations**
+*(Source: `nutrition_guidelines.txt`)*
+*   **Protein:** Aim for 1.6g of protein per kilogram of body weight on training days.
+*   **Hydration:** Drink at least 2.5 liters of water per day.
+*   **Weekly Cardio Goal:** At least 150 minutes of moderate cardio across at least three sessions.
+
+### **Your Activity (Last 7 Days)**
+You logged **2 cardio sessions** totaling **90 minutes**:
+*   **May 29:** Running (40 minutes)
+*   **June 1:** Cycling (50 minutes)
+
+### **Comparison**
+*   **Cardio Volume:** You are currently at 90 minutes, which is **60 minutes short** of your 150-minute weekly goal.
+*   **Frequency:** You have completed 2 sessions, so you need **one more session** to meet your target of three sessions per week.
+*   **Nutrition Note:** Since you had two training days, ensure you hit your protein target (1.6g/kg) and maintained your 2.5L hydration goal on those days.",,,,,
+a157,Add a 45-minute running workout and tell me whether I trained more this week than last.,"I've logged your 45-minute run for today.
+
+Comparing your activity:
+*   **This week:** 65 minutes
+*   **Last week:** 30 minutes
+
+You've trained more this week than last week—great job keeping up the momentum!",,,,,
+a158,"Log a workout, 1 hour.",,,,,,
+a159,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between aerobic and anaerobic exercise lies in how your body uses oxygen and energy during the activity.
+
+### **Aerobic Exercise (""With Oxygen"")**
+Aerobic exercise is any activity that increases your heart rate and breathing for an extended period. During these activities, your body uses oxygen to break down glucose and fat for energy.
+*   **Intensity:** Low to moderate.
+*   **Duration:** Long (usually 20 minutes or more).
+*   **Goal:** Improves cardiovascular endurance and heart health.
+*   **Examples:** Running, swimming, cycling, brisk walking, and rowing.
+
+### **Anaerobic Exercise (""Without Oxygen"")**
+Anaerobic exercise involves short, intense bursts of activity. Because the intensity is so high, your body cannot deliver oxygen to your muscles fast enough to produce energy. Instead, it relies on energy sources stored directly in the muscles (like glucose) through a process called glycolysis.
+*   **Intensity:** High.
+*   **Duration:** Short (seconds to a few minutes).
+*   **Goal:** Builds muscle mass, strength, and power.
+*   **Examples:** Weightlifting, sprinting, High-Intensity Interval Training (HIIT), and plyometrics.
+
+**Summary:** Think of **aerobic** as ""endurance"" (steady and sustainable) and **anaerobic** as ""power"" (quick and explosive). Most well-rounded fitness routines include a mix of both!",,,,,
+a160,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the gradual increase of stress placed upon the body during exercise. In simple terms, it means you have to make your workouts more challenging over time to keep seeing results in strength, muscle size, or endurance.
+
+If you do the exact same workout every day, your body eventually adapts and plateaus. To keep improving, you can apply progressive overload by:
+
+*   **Increasing weight:** Lifting heavier than you did before.
+*   **Increasing volume:** Doing more repetitions or sets.
+*   **Increasing frequency:** Training a muscle group more often.
+*   **Decreasing rest:** Taking shorter breaks between sets to increase intensity.
+
+It’s the fundamental principle behind most successful training programs!",,,,,
+a161,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between the two is how your body produces energy during the activity.
+
+**Aerobic Exercise (""With Oxygen"")**
+*   **What it is:** Steady, rhythmic activities that you can sustain for a long period.
+*   **How it works:** Your heart and lungs work together to provide a continuous supply of oxygen to your muscles to create energy.
+*   **Examples:** Jogging, swimming, cycling, or brisk walking.
+*   **Benefit:** Improves cardiovascular endurance and overall heart health.
+
+**Anaerobic Exercise (""Without Oxygen"")**
+*   **What it is:** Short, intense bursts of activity where your body’s demand for oxygen exceeds the immediate supply.
+*   **How it works:** Your body breaks down glucose stores for energy without relying on inhaled oxygen. This can only be sustained for a few seconds to a couple of minutes.
+*   **Examples:** Sprinting, heavy weightlifting, or high-intensity interval training (HIIT).
+*   **Benefit:** Builds muscle mass, strength, and power.
+
+A simple way to remember it: **Aerobic** is for endurance (like a marathon), while **anaerobic** is for power (like a 100m dash).",,,,,
+a162,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake.,,,,,
+a163,Hey there! How are you doing today?,"I'm doing great, thank you for asking! It's Wednesday, June 3rd, 2026, and I'm ready to help you with whatever you need—whether it's tracking your spending, logging a workout, or answering questions about your documents.
+
+How can I help you today?",,,,,
+a164,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool and doesn't directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a165,What does the term 'progressive overload' mean in strength training?,"**Progressive overload** is the fundamental principle of strength training that involves gradually increasing the stress placed on the body during exercise. 
+
+The goal is to continually challenge your musculoskeletal system so that it is forced to adapt, resulting in increased strength, muscle mass, and endurance. If you keep doing the same workout with the same weights and intensity, your body will eventually plateau because it has already adapted to that specific workload.
+
+### How to apply it:
+You can achieve progressive overload by adjusting several variables:
+*   **Resistance:** Increasing the weight (e.g., moving from 50kg to 52.5kg on a bench press).
+*   **Volume:** Increasing the total number of repetitions or sets.
+*   **Frequency:** Increasing how often you train a specific muscle group.
+*   **Intensity/Density:** Decreasing rest time between sets or performing the same work in less time.
+*   **Form/Tempo:** Improving your technique or slowing down the movement to increase ""time under tension.""
+
+In short: to get stronger, you have to make your workouts harder over time.",,,,,
+a166,Add an expense: 8 BGN for coffee yesterday under Food.,OK. I've logged your 8 BGN coffee from yesterday under Food.,,,,,
+a167,Show me all my Fitness expenses this week.,"You have two fitness expenses for this week:
+
+*   **June 2, 2026:** Gym shoes ($40.00)
+*   **June 3, 2026:** Protein shake ($12.50)",,,,,
+a168,"Log a workout, 1 hour.","What kind of workout was it (e.g., Running, Weightlifting) and which category does it fall into (e.g., Cardio, Strength)? Once I have those details, I'll get it logged for you!",,,,,
+a169,"Log a workout, 1 hour.","What kind of workout was it (e.g., Running, Weightlifting) and which category does it fall into (e.g., Cardio, Strength)? Once I have those details, I'll get it logged for you!",,,,,
+a170,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between aerobic and anaerobic exercise lies in how your body uses oxygen and energy during the activity.
+
+### **Aerobic Exercise (""With Oxygen"")**
+Aerobic exercise is any activity that increases your heart rate and breathing for an extended period. During these activities, your body uses oxygen to break down glucose and fat for energy.
+*   **Intensity:** Low to moderate.
+*   **Duration:** Long (usually 20 minutes or more).
+*   **Goal:** Improves cardiovascular endurance and heart health.
+*   **Examples:** Running, swimming, cycling, brisk walking, and rowing.
+
+### **Anaerobic Exercise (""Without Oxygen"")**
+Anaerobic exercise involves short, intense bursts of activity. Because the intensity is so high, your body cannot deliver oxygen to your muscles fast enough to produce energy. Instead, it relies on energy sources stored directly in the muscles (like glycogen).
+*   **Intensity:** High.
+*   **Duration:** Short (seconds to a few minutes).
+*   **Goal:** Builds muscle mass, strength, and power.
+*   **Examples:** Sprinting, heavy weightlifting, High-Intensity Interval Training (HIIT), and plyometrics.
+
+**In short:** If you can maintain the pace for a long time while breathing steadily, it’s likely **aerobic**. If you’re ""out of breath"" and can only keep it up for a few seconds or minutes, it’s **anaerobic**.",,,,,
+a171,Show me all my Fitness expenses this week.,"OK, here are your Fitness expenses for this week:
+
+*   **June 2nd:** Gym shoes ($40.00)
+*   **June 3rd:** Protein shake ($12.50)",,,,,
+a172,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"I encountered an error searching documents: Recursion limit of 15 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",,,,,
+a173,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for your lunch today.,,,,,
+a174,Track that I had a good day., Just let me know the details!,,,,,
+a175,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"OK. I've logged your 25 BGN expense for food today.
+
+For this week (June 1 – June 7), you have spent a total of **30.00 BGN** specifically on restaurants (a dinner on June 1st). Your total spending in the ""Food"" category for the week is 55.00 BGN.",,,,,
+a176,And what is considered a healthy range?,"For most adults, a healthy BMI range is **18.5 to 24.9**.
+
+Here is the general breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool. It doesn’t directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a177,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st to June 3rd), here is your recap:
+
+*   **Total Spending:** $20.00 (all in the **Food** category).
+*   **Total Workout Time:** 35 minutes.",,,,,
+a178,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st – June 7th), here is your recap:
+
+*   **Total Spending:** You've spent **$20.00** (all in the Food category).
+*   **Workout Time:** You've logged a total of **35 minutes** of exercise.",,,,,
+a179,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for you.,,,,,
+a180,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool and doesn't directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a181,Hey there! How are you doing today?,"I'm doing great, thank you for asking! How are things going with you? Is there anything I can help you with today?",,,,,
+a182,Summarise the gym membership tiers from my documents.,"Based on the document `gym_membership.txt`, here are the gym membership tiers:
+
+*   **Basic:** 35 BGN per month (includes access to the weights area only).
+*   **Standard:** 55 BGN per month (includes weights, group classes, and the swimming pool).
+*   **Premium:** 85 BGN per month (includes all Standard features plus one personal trainer session per month).",,,,,
+a183,What kinds of things can you help me with?,"I can help you manage your daily life across three main areas:
+
+1.  **Finance & Fitness Tracking:** I can log your expenses (like groceries or bills) and your workouts (sets, reps, or cardio). I can also provide summaries of your spending or exercise history over any time period.
+2.  **Document Q&A:** If you upload files, I can search through them to answer specific questions, summarize content, or find details buried in your documents.
+3.  **General Assistance:** I can answer general knowledge questions, help with writing, or just chat.
+
+Is there something specific you'd like to start with?",,,,,
+a184,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake.,,,,,
+a185,Log 20 BGN for yesterday.,"What was the 20 BGN for? Please let me know the category (e.g., Food, Transport) and a short description so I can log it correctly for you.",,,,,
+a186,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the general breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+While BMI is a useful screening tool, it's worth noting that it doesn't directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a187,Hey there! How are you doing today?,"I'm doing great, thank you for asking! It's Wednesday, June 3rd, 2026, and I'm ready to help you with whatever you need—whether it's tracking your spending, logging a workout, or answering questions about your documents.
+
+How can I help you today?",,,,,
+a188,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for new running shoes under Fitness and recorded your 5 km run for today.,,,,,
+a189,How much water should I drink per day based on my nutrition document?,"According to your nutrition document, you should drink at least **2.5 litres of water per day**. Additionally, you should add 500 ml for every hour of intense exercise.
+
+Source: `nutrition_guidelines.txt`",,,,,
+a190,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today. Nice work!,,,,,
+a191,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for new running shoes and your 5 km run for today.,,,,,
+a192,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for your lunch today.,,,,,
+a193,How much have I spent on coffee?,"You have spent a total of **$8.50** on coffee.
+
+Here are the details:
+*   **$4.00** on 2026-05-20
+*   **$4.50** on 2026-06-02",,,,,
+a194,"Log a workout, 1 hour.","What did you do for your workout? Just let me know the exercise name (like Running or Weightlifting) and the category, and I'll get that logged for you!",,,,,
+a195,Add a 45-minute running workout and tell me whether I trained more this week than last.,"I've logged your 45-minute run for today.
+
+Comparing your training time:
+*   **This week (June 1 – June 7):** 65 minutes (including today's run)
+*   **Last week (May 25 – May 31):** 30 minutes
+
+You've trained more this week than last week! Great job keeping up the momentum.",,,,,
+a196,Add an expense: 8 BGN for coffee yesterday under Food.,OK. I've logged your 8 BGN coffee from yesterday under Food.,,,,,
+a197,Log 20 BGN for yesterday.,"What was the 20 BGN for? Please let me know the category (e.g., Food, Transport) and a short description so I can log it correctly for you.",,,,,
+a198,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"OK. I've logged your 25 BGN expense for food today.
+
+For this week (June 1st – June 7th), you've spent a total of **30.00 BGN** on restaurants (specifically, a ""Restaurant dinner"" on June 1st). Including your food purchase today, your total spending in the ""Food"" category for the week is 55.00 BGN.",,,,,
+a199,Does my gym offer a student discount? Check my documents.,"Based on the document `gym_membership.txt`, there is no mention of a student discount. The document only lists the membership tiers (Basic, Standard, and Premium) and the cancellation policy.",,,,,
+a200,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged that 8 BGN coffee expense for you under Food for yesterday, June 2nd.",,,,,
+a201,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged an expense of 8 BGN for coffee under Food for yesterday, June 2nd.",,,,,
+a202,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for running shoes and your 5 km run for today.,,,,,
+a203,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool and doesn't directly measure body fat or account for muscle mass, bone density, or overall body composition.",,,,,
+a204,What kinds of things can you help me with?,"I can help you stay organized across a few different areas:
+
+*   **Finance Tracking:** I can log your expenses, categorize them, and give you summaries of your spending over time.
+*   **Fitness Tracking:** I can record your workouts (sets, reps, weights, or cardio) and track your progress.
+*   **Document Q&A:** If you upload files, I can search through them to answer specific questions or summarize their content.
+*   **General Assistance:** I can answer general questions, help with scheduling, or just chat.
+
+Is there something specific you'd like to start with?",,,,,
+a205,Can you explain the difference between aerobic and anaerobic exercise?,"The main difference between the two comes down to how your body uses oxygen to produce energy.
+
+**Aerobic Exercise (""With Oxygen"")**
+*   **What it is:** Sustained, rhythmic activity that increases your heart rate for a longer period.
+*   **How it works:** Your body uses a steady supply of oxygen to burn fat and carbohydrates for energy.
+*   **Examples:** Jogging, swimming, cycling, or brisk walking.
+*   **Benefit:** Improves cardiovascular health and builds endurance.
+
+**Anaerobic Exercise (""Without Oxygen"")**
+*   **What it is:** Short, intense bursts of activity where the demand for oxygen exceeds the supply.
+*   **How it works:** Your body breaks down glucose stores in the muscles because it can't get oxygen fast enough to fuel the movement.
+*   **Examples:** Sprinting, heavy weightlifting, or high-intensity interval training (HIIT).
+*   **Benefit:** Builds muscle mass, strength, and power.
+
+In short: **Aerobic** is for endurance and ""steady-state"" cardio, while **Anaerobic** is for power and high-intensity strength.",,,,,
+a206,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"I've logged your 25 BGN expense for food. 
+
+Regarding your spending this week (June 1st – June 3rd):
+*   **Restaurants:** 0 BGN (No expenses found in this category)
+*   **Food:** 55 BGN (Total for the week)",,,,,
+a207,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged that 8 BGN coffee expense for you under Food for yesterday, June 2nd.",,,,,
+a208,And what is considered a healthy range?,"For most adults, a healthy BMI is considered to be between **18.5 and 24.9**.
+
+Here is the standard breakdown:
+*   **Underweight:** Below 18.5
+*   **Healthy weight:** 18.5 to 24.9
+*   **Overweight:** 25.0 to 29.9
+*   **Obese:** 30.0 or higher
+
+Keep in mind that BMI is a general screening tool. It doesn’t account for muscle mass, bone density, or overall body composition, so it may not be perfectly accurate for athletes or older adults.",,,,,
+a209,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for your lunch today.,,,,,
+a210,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" entry from today.",,,,,
+a211,What is my daily protein target on training days according to my documents?,"According to your **nutrition_guidelines.txt**, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a212,"Log a workout, 1 hour.",,,,,,
+a213,"Log a workout, 1 hour.",,,,,,
+a214,What kinds of things can you help me with?,"I can help you with a wide range of general tasks! Here are a few examples:
+
+*   **General Knowledge:** Answering questions about history, science, geography, and more.
+*   **Writing & Editing:** Helping you draft emails, stories, or refine your writing.
+*   **Brainstorming:** Coming up with gift ideas, meal plans, or travel itineraries.
+*   **Problem Solving:** Assisting with math problems, logic puzzles, or explaining complex topics.
+*   **Chitchat:** Just having a friendly conversation!
+
+If you need to log expenses, track workouts, or search through your uploaded documents, let me know and I’ll hand you off to a specialist who can help with those specific tasks. 
+
+How can I help you today?",,,,,
+a215,Add a 45-minute running workout and tell me whether I trained more this week than last.,"OK. I've logged your 45-minute run for today.
+
+Comparing your training:
+*   **This week (Jun 1 – Jun 7):** 65 minutes total.
+*   **Last week (May 25 – May 31):** 30 minutes total.
+
+You've already trained more this week than you did all of last week! Great job.",,,,,
+a216,Add a 45-minute running workout and tell me whether I trained more this week than last.,"I've logged your 45-minute running workout for today, June 3rd.
+
+Comparing your training time:
+*   **This week (June 1 – June 7):** You have completed **65 minutes** of exercise (today's 45-minute run plus a 20-minute cycling session yesterday).
+*   **Last week (May 25 – May 31):** You completed **30 minutes** of exercise.
+
+You have already trained **35 minutes more** this week than you did all of last week! Great job keeping up the momentum.",,,,,
+a217,Summarise the gym membership tiers from my documents.,"Based on the document **gym_membership.txt**, there are three gym membership tiers:
+
+*   **Basic (35 BGN/month):** Provides access to the weights area only.
+*   **Standard (55 BGN/month):** Includes access to the weights area, group classes, and the swimming pool.
+*   **Premium (85 BGN/month):** Includes all Standard features plus one personal trainer session per month.",,,,,
+a218,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st to June 3rd), here is your recap:
+
+*   **Total Spending:** You've spent **$20.00** (all in the Food category).
+*   **Workout Time:** You've worked out for a total of **35 minutes**.",,,,,
+a219,Show me all my Fitness expenses this week.,"You have two fitness expenses recorded for this week:
+
+*   **June 2, 2026:** Gym shoes ($40.00)
+*   **June 3, 2026:** Protein shake ($12.50)",,,,,
+a220,What is my daily protein target on training days according to my documents?,"According to the **nutrition_guidelines.txt** document, your daily protein target on training days is **1.6 grams of protein per kilogram of body weight**.",,,,,
+a221,Hey there! How are you doing today?,"I'm doing great, thank you for asking! It's Wednesday, June 3rd, 2026, and I'm ready to help you with whatever you need—whether it's tracking your spending, logging a workout, or looking something up in your documents.
+
+How can I help you today?",,,,,
+a222,How much did I spend on Food this week?,You've spent a total of **$25.00** on Food so far this week.,,,,,
+a223,What kinds of things can you help me with?,"I can help you with a wide range of general tasks! Here are a few examples:
+
+*   **General Knowledge:** Answering questions about history, science, geography, and more.
+*   **Writing & Editing:** Helping you draft emails, stories, or refine your writing.
+*   **Brainstorming:** Coming up with gift ideas, meal plans, or travel itineraries.
+*   **Problem Solving:** Assisting with math problems, logic puzzles, or explaining complex topics.
+*   **Chitchat:** Just having a friendly conversation!
+
+If you need to log expenses, track workouts, or search through your uploaded documents, let me know and I’ll hand you off to a specialist who can help with those specific tasks. 
+
+How can I help you today?",,,,,
+a224,How much notice do I need to give to cancel my gym membership?,"To cancel your gym membership, you must provide **30 days written notice**.
+
+Source: gym_membership.txt",,,,,
+a225,Log 20 BGN for yesterday.,,,,,,
+a226,"I spent 12.50 BGN on a protein shake today, that's a fitness expense.",OK. I've logged that 12.50 BGN fitness expense for your protein shake.,,,,,
+a227,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"I've logged your 25 BGN expense for food today.
+
+For this week (June 1st – June 7th), you have spent a total of **55.00 BGN** in the **Food** category. I don't see any expenses specifically categorized as ""Restaurants"" yet.",,,,,
+a228,How much water should I drink per day based on my nutrition document?,"Based on your **nutrition_guidelines.txt** document, you should drink at least **2.5 litres** of water per day. It also recommends adding an extra **500 ml** for every hour of intense exercise.",,,,,
+a229,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"For this week (June 1st to June 3rd), here is your recap:
+
+*   **Total Spending:** You've spent **$20.00** (all in the Food category).
+*   **Total Workout Time:** You've worked out for a total of **35 minutes**.",,,,,
+a230,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"Based on your document **nutrition_guidelines.txt**, here are your nutrition and training recommendations compared to your activity over the last 7 days (May 28 – June 3):
+
+### **Nutrition & Hydration Guidelines**
+*   **Protein:** Aim for **1.6g of protein per kilogram** of body weight on training days.
+*   **Hydration:** Drink at least **2.5 liters** of water per day.
+
+### **Training Comparison**
+The guidelines recommend at least **150 minutes of moderate cardio** per week across at least **three sessions**.
+
+| Metric | Recommendation | Your Last 7 Days | Status |
+| :--- | :--- | :--- | :--- |
+| **Total Cardio Time** | 150+ minutes | 90 minutes | 60 mins short |
+| **Session Count** | 3+ sessions | 2 sessions | 1 session short |
+
+**Your Workouts:**
+*   **May 29:** Running (40 minutes)
+*   **June 1:** Cycling (50 minutes)
+
+To meet your weekly goal, you'd need one more cardio session of at least 60 minutes. Since today is June 3rd, you still have time to fit that in!",,,,,
+a231,Give me a quick recap of this week: how much I spent in total and how long I worked out.,"So far this week, you've spent a total of **$20.00** (all on Food) and worked out for **35 minutes**.",,,,,
+a232,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" from today.",,,,,
+a233,Does my gym offer a student discount? Check my documents.,"Based on the document **gym_membership.txt**, there is no mention of a student discount. The document lists membership tiers (Basic, Standard, and Premium) and cancellation policies, but specifically states that it does not include information about student discounts or free trials.",,,,,
+a234,"Log a workout, 1 hour.","I'd be happy to log that for you! What kind of workout was it (e.g., Running, Weightlifting, Yoga) and which category does it fall into (Cardio, Strength, etc.)?",,,,,
+a235,Summarise the gym membership tiers from my documents.,"Based on the document `gym_membership.txt`, here are the gym membership tiers:
+
+*   **Basic:** 35 BGN per month (includes weights area only).
+*   **Standard:** 55 BGN per month (includes weights area, group classes, and swimming pool).
+*   **Premium:** 85 BGN per month (includes all Standard features plus one monthly personal trainer session).",,,,,
+a236,Add a 45-minute running workout and tell me whether I trained more this week than last.,"I've logged your 45-minute running workout for today.
+
+Comparing your training time:
+*   **This week (June 1 – June 7):** 65 minutes (including today's run and a 20-minute cycling session).
+*   **Last week (May 25 – May 31):** 30 minutes.
+
+You've trained **35 minutes more** this week than you did last week. Great job!",,,,,
+a237,Track that I had a good day.,"I'm glad to hear you had a good day! Would you like to log something specific to celebrate? 
+
+For example, I can:
+* **Log a celebratory meal or treat** as an expense.
+* **Record a great workout** you completed.
+
+Just let me know the details!",,,,,
+a238,What does the term 'progressive overload' mean in strength training?,"Progressive overload is the fundamental principle of strength training that involves gradually increasing the stress placed on the body during exercise. 
+
+The goal is to continually challenge your musculoskeletal system so that it is forced to adapt, resulting in gains in muscle size, strength, and endurance. If you keep the weight and intensity the same indefinitely, your body will eventually plateau because it has already adapted to that specific workload.
+
+### How to implement it:
+You can achieve progressive overload by adjusting several variables:
+
+*   **Resistance:** Increasing the weight you are lifting (e.g., moving from 50lb to 55lb).
+*   **Volume:** Increasing the total number of repetitions or sets.
+*   **Frequency:** Increasing how often you train a specific muscle group.
+*   **Intensity:** Decreasing rest time between sets or increasing the speed/tempo of the lift.
+*   **Range of Motion:** Performing the exercise through a greater distance to increase the work done.
+
+In short: to get stronger, you have to make your workouts harder over time.",,,,,
+a239,Add an expense: 8 BGN for coffee yesterday under Food.,"OK. I've logged that 8 BGN coffee expense for you under Food for yesterday, June 2nd.",,,,,
+a240,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" from today.",,,,,
+a241,Does my gym offer a student discount? Check my documents.,"Based on the document **gym_membership.txt**, there is no mention of a student discount. The document only lists the following membership tiers:
+
+*   **Basic:** 35 BGN per month
+*   **Standard:** 55 BGN per month
+*   **Premium:** 85 BGN per month",,,,,
+a242,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"OK. I've logged your 25 BGN expense for food today.
+
+Regarding your restaurant spending for this week (June 1st – June 7th), you haven't recorded any expenses under the ""Restaurants"" category yet. Your total spending in the ""Food"" category for this week is 30.00 BGN.",,,,,
+a243,Log 20 BGN for yesterday.,,,,,,
+a244,Does my gym offer a student discount? Check my documents.,"Based on the document **gym_membership.txt**, there is no mention of a student discount. It lists the following membership tiers:
+
+*   **Basic:** 35 BGN/month
+*   **Standard:** 55 BGN/month
+*   **Premium:** 85 BGN/month
+
+The document also notes that cancellation requires 30 days' written notice and does not mention a free trial period.",,,,,
+a245,Log a 30 minute cardio run for today.,OK. I've logged your 30-minute run for today.,,,,,
+a246,How much notice do I need to give to cancel my gym membership?,"To cancel your gym membership, you must provide **30 days written notice**. 
+
+Additionally, the policy states that no cancellation fee applies if you have been a member for at least 3 months (Source: `gym_membership.txt`).",,,,,
+a247,Delete my last expense.,"OK. I've deleted your last expense: a $18.00 ""Takeaway"" from today.",,,,,
+a248,"Log a workout, 1 hour.",,,,,,
+a249,Log that I spent 25 BGN on food today and show me how much I've spent on restaurants this week.,"I've logged your 25 BGN expense for food today.
+
+For this week (June 1st – June 7th), you have spent a total of **30.00 BGN** in the **Food** category. I don't see any expenses specifically categorized as ""Restaurants"" yet, but that total includes the 25 BGN you just added.",,,,,
+a250,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for new running shoes and your 5 km run for today.,,,,,
+a251,I logged my lunch as 10 BGN but it was actually 14. Delete the old one and add the corrected amount.,OK. I've deleted the 10 BGN lunch entry and logged the corrected amount of 14 BGN for your lunch today.,,,,,
+a252,Add a 45-minute running workout and tell me whether I trained more this week than last.,"OK. I've logged your 45-minute run for today.
+
+Comparing your training:
+*   **This week (so far):** 65 minutes
+*   **Last week:** 30 minutes
+
+You've already trained more this week than you did all of last week! Great job.",,,,,
+a253,Does my gym offer a student discount? Check my documents.,"Based on the document **gym_membership.txt**, there is no mention of a student discount. The document only lists the following membership tiers:
+
+*   **Basic:** 35 BGN per month
+*   **Standard:** 55 BGN per month
+*   **Premium:** 85 BGN per month",,,,,
+a254,How much water should I drink per day based on my nutrition document?,"Based on your **nutrition_guidelines.txt** document, you should drink at least **2.5 litres of water per day**. 
+
+Additionally, the document recommends adding **500 ml** for every hour of intense exercise.",,,,,
+a255,Delete my last expense.,"OK. I've deleted your last expense: $18.00 for ""Takeaway"" on 2026-06-03.",,,,,
+a256,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"I encountered an error searching documents: Recursion limit of 15 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",,,,,
+a257,"Log 60 BGN for new running shoes today under Fitness, and log a 5 km run for today too.",OK. I've logged your 60 BGN expense for running shoes and your 5 km run for today.,,,,,
+a258,Add a 45-minute running workout and tell me whether I trained more this week than last.,"I've logged your 45-minute running workout for today.
+
+**Training Comparison:**
+*   **This Week (June 1 – June 7):** 65 minutes (including today's run and a 20-minute cycling session yesterday).
+*   **Last Week (May 25 – May 31):** 30 minutes.
+
+You have trained **35 minutes more** this week than you did last week! Great job keeping up the momentum.",,,,,
+a259,Summarise the gym membership tiers from my documents.,"Based on the document **gym_membership.txt**, there are three gym membership tiers:
+
+*   **Basic (35 BGN/month):** Provides access to the weights area only.
+*   **Standard (55 BGN/month):** Includes access to the weights area, group classes, and the swimming pool.
+*   **Premium (85 BGN/month):** Includes all Standard features plus one personal trainer session per month.",,,,,
+a260,Find the nutrition recommendations in my documents and compare them with my workouts from the last 7 days.,"Based on your documents and workout history from the last 7 days (May 28 – June 3), here is how your activity compares to your guidelines:
+
+### **Nutrition & Training Recommendations**
+*(Source: `nutrition_guidelines.txt`)*
+*   **Protein:** Aim for 1.6g of protein per kg of body weight on training days.
+*   **Hydration:** Drink at least 2.5 liters of water per day.
+*   **Weekly Cardio Goal:** At least 150 minutes of moderate cardio across at least three sessions.
+
+### **Your Activity (Last 7 Days)**
+You logged **2 cardio sessions** totaling **90 minutes**:
+*   **May 29:** Running (40 minutes)
+*   **June 1:** Cycling (50 minutes)
+
+### **Comparison**
+*   **Frequency:** You completed 2 sessions, which is 1 session short of your 3-session weekly goal.
+*   **Duration:** You logged 90 minutes of cardio, meaning you are **60 minutes short** of your 150-minute weekly target.
+*   **Nutrition Note:** Since you had two training days, remember to hit your protein target of 1.6g/kg and maintain your 2.5L hydration goal for those days.",,,,,

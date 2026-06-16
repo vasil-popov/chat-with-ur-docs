@@ -108,6 +108,9 @@ class MetricsCallbackHandler(AsyncCallbackHandler):
         self._tool_call_count = 0
         self._tools_called: list[tuple[str, dict[str, Any]]] = []
         self._chain_starts = 0
+        # Order-preserving, duplicates allowed: every non-plumbing node entry, so
+        # a downstream scorer can derive the supervisor's actual route.
+        self._nodes_visited: list[str] = []
         self._first_token_perf: float | None = None
         self._run_start_perf: float | None = None
 
@@ -167,6 +170,9 @@ class MetricsCallbackHandler(AsyncCallbackHandler):
         if name in _HOP_PLUMBING_NAMES:
             return
         self._chain_starts += 1
+        # Record the node name in entry order (duplicates kept) for route derivation.
+        if isinstance(name, str):
+            self._nodes_visited.append(name)
 
     def build_metrics(self) -> RunMetrics:
         """Return a RunMetrics with everything the handler observed.
@@ -194,6 +200,7 @@ class MetricsCallbackHandler(AsyncCallbackHandler):
             tool_call_count=self._tool_call_count,
             tools_called=list(self._tools_called),
             hops=self._chain_starts,
+            nodes_visited=list(self._nodes_visited),
         )
 
     def mark_run_start(self, perf_now: float) -> None:
@@ -238,15 +245,28 @@ async def run_with_metrics(
     ``recursion_limit`` — is left untouched. Wall-clock latency and estimated
     cost are filled in here; the handler supplies the rest.
     """
+    from langgraph.errors import GraphRecursionError  # local import is fine
+
     handler = MetricsCallbackHandler()
     merged_config = _merge_callbacks(config, handler)
 
+    # A recursion-limit blow-up (the supervisor looping router->specialist->router)
+    # is captured as DATA, not propagated: the partial metrics the handler already
+    # accumulated (tools, nodes, tokens -> cost) are kept so the runaway run still
+    # counts. Only GraphRecursionError is caught here; every other exception still
+    # propagates to _run_one's handler.
+    non_termination = False
     start_perf = time.perf_counter()
     handler.mark_run_start(start_perf)
-    result = await graph.ainvoke(state, config=merged_config)
+    try:
+        result = await graph.ainvoke(state, config=merged_config)
+    except GraphRecursionError:
+        result = None
+        non_termination = True
     end_perf = time.perf_counter()
 
     metrics = handler.build_metrics()
+    metrics.non_termination = non_termination
     metrics.latency_total_ms = (end_perf - start_perf) * 1000.0
     metrics.est_cost_usd = compute_cost(
         metrics.prompt_tokens,

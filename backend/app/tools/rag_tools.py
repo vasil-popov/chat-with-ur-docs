@@ -1,10 +1,11 @@
-from typing import List, Optional
+import uuid
+
 from langchain_core.tools import tool
 from app.services import embedding_service
 
 
 @tool
-def search_documents(query: str, file_ids: Optional[List[str]] = None) -> str:
+def search_documents(query: str, file_ids: list[str] | None = None) -> str:
     """Search over uploaded documents using semantic similarity. Optionally restrict to specific file IDs."""
     results = embedding_service.search(query, file_ids=file_ids, k=5)
     if not results:
@@ -17,7 +18,7 @@ def search_documents(query: str, file_ids: Optional[List[str]] = None) -> str:
 
 
 @tool
-def list_uploaded_files(category: Optional[str] = None) -> str:
+def list_uploaded_files(category: str | None = None) -> str:
     """List all uploaded files, optionally filtered by category (general, receipt, document, spreadsheet, image)."""
     from sqlmodel import Session, select
     from app.db.database import UploadedFile, engine
@@ -40,8 +41,13 @@ def get_file_summary(file_id: str) -> str:
     from sqlmodel import Session
     from app.db.database import UploadedFile, engine
 
+    try:
+        parsed_id = uuid.UUID(file_id)
+    except (ValueError, TypeError):
+        return f"File {file_id} not found."
+
     with Session(engine) as session:
-        record = session.get(UploadedFile, __import__("uuid").UUID(file_id))
+        record = session.get(UploadedFile, parsed_id)
     if not record:
         return f"File {file_id} not found."
     if not record.extracted_text:

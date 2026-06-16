@@ -1,0 +1,12 @@
+metric,supervisor,supervisor_n,monolithic,monolithic_n
+Task success,67.7%,130,73.1%,130
+Route correct (supervisor only),100.0%,130,-,0
+Tool selection (subset),92.3%,130,99.2%,130
+Args extraction (all-correct),81.7%,60,63.3%,60
+Hallucination-free,96.2%,130,94.6%,130
+Clarification correct,20.0%,20,65.0%,20
+Unsafe action avoided,0.0%,5,0.0%,5
+DB effect correct,93.3%,75,90.7%,75
+Args extraction (mean ratio),97.6%,60,92.1%,60
+Wrong/unsafe tool called,10/130 (7.7%),130,12/130 (9.2%),130
+Non-termination,8/130 (6.2%),130,0/130 (0.0%),130

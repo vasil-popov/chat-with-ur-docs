@@ -104,8 +104,11 @@ def _clean_messages_for_general(msgs: list) -> list:
     ]
 
 
-def build_graph(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
-    today = date.today().isoformat()
+def build_graph(llm, mcp_tools: list, rag_tools: list, today: str | None = None) -> CompiledStateGraph:
+    # `today` is injectable for deterministic evaluation (pinned to the dataset
+    # reference_date); default preserves production behavior via date.today().
+    today = today if today is not None else date.today().isoformat()
+    logger.info("Building supervisor graph with today=%s", today)
 
     tracking_agent = create_react_agent(
         llm,
@@ -190,7 +193,7 @@ def build_graph(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
     return graph
 
 
-def build_monolithic_agent(llm, mcp_tools: list, rag_tools: list) -> CompiledStateGraph:
+def build_monolithic_agent(llm, mcp_tools: list, rag_tools: list, today: str | None = None) -> CompiledStateGraph:
     """Build the monolithic ReAct-agent arm of the thesis comparison.
 
     A single ``create_react_agent`` is given the union of every tool and a prompt
@@ -202,7 +205,10 @@ def build_monolithic_agent(llm, mcp_tools: list, rag_tools: list) -> CompiledSta
     Returns a compiled LangGraph graph that is drop-in compatible with
     ``chat_service`` (supports ``astream_events`` / ``ainvoke``).
     """
-    today = date.today().isoformat()
+    # `today` is injectable for deterministic evaluation (pinned to the dataset
+    # reference_date); default preserves production behavior via date.today().
+    today = today if today is not None else date.today().isoformat()
+    logger.info("Building monolithic graph with today=%s", today)
 
     logger.info(
         "Monolithic ReAct agent compiled with %d MCP tools and %d RAG tools",

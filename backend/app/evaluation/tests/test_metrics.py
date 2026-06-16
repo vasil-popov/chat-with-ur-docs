@@ -63,3 +63,8 @@ class TestRunMetricsToDict:
     def test_to_dict_empty_tools_is_serialisable(self) -> None:
         metrics = RunMetrics()
         json.dumps(metrics.to_dict())  # must not raise
+
+    def test_to_dict_includes_non_termination_defaulting_false(self) -> None:
+        as_dict = RunMetrics().to_dict()
+        assert "non_termination" in as_dict
+        assert as_dict["non_termination"] is False

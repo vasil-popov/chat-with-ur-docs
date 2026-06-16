@@ -204,3 +204,36 @@ class TestRunWithMetrics:
         )
         assert result == {"messages": ["done"]}
         assert metrics.latency_total_ms >= 0.0
+
+    def test_graph_recursion_error_marks_non_termination(self) -> None:
+        """A GraphRecursionError is captured as data, not propagated."""
+
+        class _RecursingGraph:
+            async def ainvoke(self, state: Any, config: dict[str, Any] | None = None) -> Any:
+                from langgraph.errors import GraphRecursionError
+
+                raise GraphRecursionError("Recursion limit reached")
+
+        result, metrics = _run(
+            run_with_metrics(
+                _RecursingGraph(), {"messages": []}, {"recursion_limit": 5}, 0.0, 0.0
+            )
+        )
+
+        assert result is None
+        assert metrics.non_termination is True
+        assert metrics.latency_total_ms >= 0.0
+
+    def test_non_recursion_exception_propagates(self) -> None:
+        """Only GraphRecursionError is swallowed; other errors must surface."""
+
+        class _ExplodingGraph:
+            async def ainvoke(self, state: Any, config: dict[str, Any] | None = None) -> Any:
+                raise RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            _run(
+                run_with_metrics(
+                    _ExplodingGraph(), {"messages": []}, None, 0.0, 0.0
+                )
+            )

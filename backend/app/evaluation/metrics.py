@@ -43,6 +43,15 @@ class RunMetrics:
     # Approximated by the number of chain-node starts the handler observed; see
     # MetricsCallbackHandler.on_chain_start for the exact counting rule.
     hops: int = 0
+    # Ordered, duplicate-preserving list of the non-plumbing graph-node names the
+    # run entered (e.g. "supervisor", "tracking", "rag", "general", or the ReAct
+    # "agent"/"tools" nodes). Phase 4 derives the supervisor's actual route from
+    # the first specialist name appearing here.
+    nodes_visited: list[str] = field(default_factory=list)
+    # Marks a run that hit the graph recursion limit without terminating (i.e. it
+    # never produced a final answer and was aborted by GraphRecursionError). Such
+    # runs are scored as failures rather than excluded as errors.
+    non_termination: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serialisable dict (tuples become lists)."""
@@ -59,6 +68,8 @@ class RunMetrics:
                 [name, args] for name, args in self.tools_called
             ],
             "hops": self.hops,
+            "nodes_visited": list(self.nodes_visited),
+            "non_termination": self.non_termination,
         }
 
 

@@ -27,6 +27,18 @@ For the cost metric I will **not guess prices**. Give me the current per-1K-toke
 Running the full benchmark = (scenarios × 2 arms × N repeats) + judge calls. That can be hundreds of Gemini calls.
 - Confirm `GOOGLE_API_KEY` is set and has enough quota, **or** tell me a rate-limit you want the harness to respect (delay between calls).
 
+### 4b. Evaluation-run environment (needed before you run the benchmark — Phases 4+)
+The harness (`backend/app/evaluation/run_benchmark.py`) runs headless and writes/reads the **eval DB only**, but several processes must agree on the target. Before a run:
+
+- **Eval DB exists** with `pgvector` enabled; its name MUST contain `"eval"` (e.g. `life-tracker-eval`). The seeder hard-refuses any DB name without `"eval"`.
+- **Seeder guard vars:** set `EVAL_POSTGRE_USER / EVAL_POSTGRE_PASS / EVAL_POSTGRE_IP / EVAL_POSTGRE_PORT / EVAL_POSTGRE_DB_NAME` (the DB name = your eval DB).
+- **Point the rest at the eval DB too:** the RAG tools + embeddings use the backend's `POSTGRE_*`, and the **MCP server** uses its own `POSTGRE_*`. For a clean run, set **both** the backend and the MCP server `POSTGRE_*` to the eval DB. Otherwise the agent's tool writes (log/delete) hit production while seeding/teardown hit eval.
+- **Naming pitfall:** `config.py` Settings uses `POSTGRES_*` (with an S) while `seed.py`/`embedding_service.py`/MCP read `POSTGRE_*` (no S). Make sure **both** naming sets point at the eval DB.
+- **MCP server must be running** (the harness loads tracking tools from it) — pointed at the eval DB.
+- **`.env` location:** the harness loads the repo-root `.env`; your secrets currently live in `backend/.env`. Either consolidate, set the vars in your shell, or tell me to point the harness at `backend/.env`.
+- **Install test deps** if you want to run the suites: `pip install pytest` in `backend/venv`.
+- **Smoke first (budget):** do a cheap run before the full sweep, e.g. `python -m app.evaluation.run_benchmark --arch both --repeats 1 --limit 2` and confirm the JSONL rows look right (supervisor shows the extra router LLM call; non-zero tokens). Then scale to `--repeats 5`. `--resume` skips completed rows.
+
 ---
 
 ## 🟡 During Phase 3 (dataset) — this is where your domain knowledge is essential
