@@ -1,36 +1,3 @@
-"""LLM-as-judge -- SUPPLEMENTARY final-answer quality scoring.
-
-This module is a SECONDARY signal for the thesis. The PRIMARY evaluator is the
-rule-based scorer (``scorer.py``); the judge here grades only the QUALITY of a
-final answer against the dataset's reference answer + rubric. It MUST NEVER
-influence ``task_success`` or any rule-based metric: judge output is written to a
-separate ``"quality"`` key on the enriched run row and nothing else is touched.
-
-Blindness (two layers)
-----------------------
-1. Prompt blindness: the grading prompt is given only the user question, the
-   reference answer, the rubric points, and the candidate answer. It is NEVER
-   told which architecture produced the candidate -- there is no arch field in
-   the prompt inputs, by design.
-2. Manual-rater blindness: the human-rater CSV (``manual_scoring.csv``) is
-   shuffled, carries opaque ``anon_id`` handles, and contains NO arch /
-   scenario_id / repeat. The un-blinding key lives in a SEPARATE CSV
-   (``manual_scoring_key.csv``) that is the only place architecture is recorded.
-
-Budget controls
----------------
-Judge runs are post-hoc over an existing ``runs.jsonl``. ``--limit`` caps how
-many judge calls are ATTEMPTED (an attempt budget: every ``judge_answer`` call
-counts toward it, success or failure), and ``--resume`` skips rows already
-present in the output by ``(scenario_id, arch, repeat)``. Judge token spend and
-estimated USD cost are tallied per call and summed into :class:`JudgeSummary`,
-then logged at the end.
-
-Judge failures (unparsable structured output, missing scores) are NON-FATAL:
-the row is recorded with ``{"quality": {"failed": true, ...}}`` and the batch
-continues.
-"""
-
 from __future__ import annotations
 
 import argparse

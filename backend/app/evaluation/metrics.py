@@ -1,10 +1,3 @@
-"""Run-level metric definitions, cost computation, and JSONL persistence.
-
-These types are framework-agnostic value objects: they hold the numbers a run
-produced, know how to serialise themselves, and know nothing about LangGraph or
-callbacks. The callback handler (see ``callbacks.py``) populates them.
-"""
-
 from __future__ import annotations
 
 import json

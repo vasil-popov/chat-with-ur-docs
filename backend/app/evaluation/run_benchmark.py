@@ -1,37 +1,3 @@
-"""Headless benchmark harness: runs the golden dataset through both agent arms.
-
-This is the Phase 4 entry point. For every (scenario, arch, repeat) it seeds the
-eval DB, indexes any RAG files, runs the agent with metrics, scores the run with
-the rule-based scorer, and appends one JSONL row. The DB is torn down before and
-after each run so scenarios never contaminate one another.
-
-RUN REQUIREMENTS (READ BEFORE RUNNING)
---------------------------------------
-Tool calls (log_expense, delete_*, ...) execute through the MCP server, which has
-its OWN database layer reading the production ``POSTGRE_*`` variables. The eval
-seeder reads ``EVAL_POSTGRE_*``. For the seeded data, the agent's writes, and the
-teardown to all agree, you MUST:
-
-  * Point the backend ``POSTGRE_*`` env vars at the eval database.
-  * Point the MCP server process's ``POSTGRE_*`` env vars at the SAME eval database.
-  * Set ``EVAL_POSTGRE_*`` to that SAME eval database (name MUST contain "eval").
-  * Have the MCP server running (default http://localhost:8000/mcp) and a valid
-    Gemini API key in the environment (GOOGLE_API_KEY).
-
-If the MCP server points at production while the seeder points at eval, the
-agent's writes hit production and the recorded db_delta will be wrong. The seeder
-refuses any DB whose name lacks "eval", but it cannot police the MCP server's DB.
-
-Phase 5 hook: ``--judge`` runs the post-hoc LLM-as-judge over the just-written
-``runs.jsonl`` after the sweep completes (see ``judge.judge_runs``). The judge is
-SUPPLEMENTARY: it grades final-answer quality only and never affects
-``task_success``. ``--no-judge`` (default) skips judging entirely.
-
-Usage:
-    python -m app.evaluation.run_benchmark --arch both --repeats 5
-    python -m app.evaluation.run_benchmark --arch supervisor --limit 3 --repeats 1
-"""
-
 from __future__ import annotations
 
 import argparse

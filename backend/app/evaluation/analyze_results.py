@@ -1,25 +1,3 @@
-"""Phase C analysis & reporting for the thesis benchmark.
-
-Reads the frozen judged run log (``results/runs_judged.jsonl``) and produces a
-single, thesis-ready Word document (native editable tables + embedded figures)
-plus CSV backups under ``results/analysis/``.
-
-The rule-based scorer is the PRIMARY evaluator; the LLM judge appears clearly
-labelled as SUPPLEMENTARY. Nothing here re-scores or mutates the run log -- it
-only aggregates, tests, and renders.
-
-Statistics
-----------
-The design is paired: every scenario is run under BOTH architectures with the
-same repeats. We therefore use paired tests:
-  * Continuous efficiency metrics (latency, tokens, cost, llm/tool calls):
-    Wilcoxon signed-rank on per-scenario means (unit of analysis = scenario).
-  * Binary accuracy axes (task_success, tool_selection, args_extraction):
-    McNemar's exact test on paired (scenario, repeat) outcomes.
-
-Run:  backend/venv/Scripts/python.exe app/evaluation/analyze_results.py
-"""
-
 from __future__ import annotations
 
 import csv

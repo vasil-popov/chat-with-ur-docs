@@ -1,23 +1,3 @@
-"""LangChain callback handler that captures per-run efficiency metrics.
-
-How the supervisor router LLM call is counted
----------------------------------------------
-A callback handler passed via ``config={"callbacks": [handler]}`` to a compiled
-LangGraph graph propagates to EVERY child runnable that runs under that config —
-including the supervisor's ``router_llm = llm.with_structured_output(...)`` call
-inside ``supervisor_node``. That routing call is a chat-model invocation, so it
-fires ``on_chat_model_start`` and ``on_llm_end`` exactly like the specialist
-ReAct calls. We therefore never special-case routing: counting every chat-model
-start automatically includes the router. On a single-domain query the supervisor
-arm reports one extra LLM call (the route decision) plus the FINISH-route call,
-which is precisely the routing overhead the thesis sets out to measure.
-
-Chat models emit ``on_chat_model_start`` (NOT ``on_llm_start``). Gemini is a chat
-model, so we override both hooks and increment on each. The two hooks are
-mutually exclusive for a given invocation in LangChain, so handling both counts
-chat and (hypothetical) completion models without double-counting.
-"""
-
 from __future__ import annotations
 
 import copy

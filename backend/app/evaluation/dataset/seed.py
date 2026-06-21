@@ -1,32 +1,3 @@
-"""Eval-database seeding and teardown helpers (SAFETY-CRITICAL).
-
-This module builds a SEPARATE SQLModel engine for the evaluation database from
-dedicated ``EVAL_POSTGRE_*`` environment variables. It deliberately does NOT
-import or reuse the production engine in ``app.db.database`` and does NOT fall
-back to the production ``POSTGRE_*`` variables. Mixing the two could cause a
-``teardown()`` to truncate the production tables.
-
-HARD SAFETY GUARD
-    Before any write or teardown, :func:`_assert_eval_database` checks that the
-    configured database name is set AND contains the substring ``"eval"``. If
-    not, it raises ``RuntimeError`` and nothing touches the database. This is the
-    single line of defence preventing an accidental wipe of production data.
-
-SETUP REQUIREMENT FOR THE USER (READ THIS)
-    The MCP server has its OWN database layer (``mcp_server/database.py``) which
-    reads the production ``POSTGRE_*`` variables. During an evaluation run the
-    agent's tool calls (log_expense, log_exercise, delete_*, ...) write through
-    the MCP server, NOT through this module. Therefore you MUST point the MCP
-    server process at the SAME eval database before running the benchmark
-    (e.g. start it with POSTGRE_DB_NAME set to your eval DB and matching
-    host/port/credentials). Otherwise the agent's writes hit production while
-    this module seeds/cleans the eval DB, and the two will disagree.
-
-Required environment variables (all must be set):
-    EVAL_POSTGRE_USER, EVAL_POSTGRE_PASS, EVAL_POSTGRE_IP, EVAL_POSTGRE_PORT,
-    EVAL_POSTGRE_DB_NAME   (the name MUST contain "eval")
-"""
-
 from __future__ import annotations
 
 import os

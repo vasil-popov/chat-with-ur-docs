@@ -1,25 +1,3 @@
-"""Pydantic v2 models and YAML loader for the golden benchmark dataset.
-
-The loader parses ``scenarios.yaml`` into typed, validated objects and fails
-fast with clear error messages on malformed input. Validation is intentionally
-strict because these scenarios are the ground truth that scored agent runs are
-compared against: a typo in a tool name or a contradictory annotation would
-silently corrupt the evaluation.
-
-Validation rules enforced here:
-  * Scenario ids are unique across the dataset.
-  * Every ``tool_calls[].name`` and every ``forbidden_tools`` entry is a member
-    of :data:`KNOWN_TOOLS` (the real MCP + RAG tool names, verbatim).
-  * If ``clarification_expected`` or ``confirmation_expected`` is true, then
-    ``no_write_expected`` must also be true (asking/confirming implies no write).
-  * ``category`` is one of the allowed literals.
-  * A ``general`` scenario must route to ``"general"`` and declare no tool_calls.
-
-All relative dates inside ``args_expected`` are authored already resolved
-against the dataset's top-level ``reference_date`` (exposed via
-:attr:`Dataset.reference_date`); the loader does NOT do date arithmetic.
-"""
-
 from __future__ import annotations
 
 from datetime import date
