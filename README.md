@@ -1,5 +1,7 @@
 # Project Overview: Life OS — Chat with Your Docs
 
+SETUP INSTRUCTIONS IN SETUP.MD
+
 A personal AI assistant that combines document Q&A, expense tracking, and fitness logging in a single conversational interface. Users interact via a React Native mobile app backed by a LangGraph multi-agent system, with a dedicated MCP server handling structured data persistence.
 
 This codebase also serves as the experimental base for a thesis comparing two agent **architectures** over the same tools and LLM: a **supervisor** multi-agent system and a single **monolithic ReAct** agent. Both arms are compiled at startup and selectable per request; a headless benchmark harness (`backend/app/evaluation/`) evaluates them against a frozen golden dataset. See [§4 Evaluation & Benchmark Harness](#4-evaluation--benchmark-harness-thesis).
