@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Get-ChildItem *)",
-      "Bash(python -m py_compile app/services/agents.py app/deps/dependency_container.py app/main.py app/api/schemas/chat.py app/api/routes/chat.py)"
-    ]
-  }
-}
