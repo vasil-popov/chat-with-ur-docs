@@ -2,6 +2,8 @@
 
 A personal AI assistant that combines document Q&A, expense tracking, and fitness logging in a single conversational interface. Users interact via a React Native mobile app backed by a LangGraph multi-agent system, with a dedicated MCP server handling structured data persistence.
 
+This codebase also serves as the experimental base for a thesis comparing two agent **architectures** over the same tools and LLM: a **supervisor** multi-agent system and a single **monolithic ReAct** agent. Both arms are compiled at startup and selectable per request; a headless benchmark harness (`backend/app/evaluation/`) evaluates them against a frozen golden dataset. See [§4 Evaluation & Benchmark Harness](#4-evaluation--benchmark-harness-thesis).
+
 ---
 
 ## Architecture at a Glance
@@ -130,7 +132,9 @@ The app uses an async lifespan context manager that, in order:
 2. Initialises the PGVector vectorstore
 3. Connects the MCP server client
 4. Creates the Google Generative AI LLM client
-5. Compiles the LangGraph supervisor agent
+5. Compiles **both** agent arms — the LangGraph supervisor graph and the monolithic ReAct agent — and registers each under its arch name in the DI container's agent registry
+
+Both arms are built from the **same** LLM instance and the **same** tool objects (MCP tools + RAG tools); architecture is the only variable that differs, keeping the thesis comparison fair.
 
 CORS is open (`allow_origins=["*"]`). A `GET /healthz` endpoint is available.
 
@@ -153,9 +157,11 @@ CORS is open (`allow_origins=["*"]`). A `GET /healthz` endpoint is available.
 | Exercises | POST | `/api/exercises` | Log exercise |
 | Exercises | DELETE | `/api/exercises/{id}` | Delete exercise log |
 
-### Multi-Agent System (`backend/app/services/agents.py`)
+### Agent Architectures (`backend/app/services/agents.py`)
 
-A LangGraph **supervisor** routes each user turn to one of three specialist agents:
+The backend ships **two interchangeable agent arms**, both compiled at startup and built by the same module. They are drop-in compatible with `chat_service` (both support `astream_events` / `ainvoke`).
+
+**Arm A — Supervisor (`build_graph`)** — a LangGraph `StateGraph` whose router LLM dispatches each turn to one of three specialist agents:
 
 ```
 User message
@@ -166,11 +172,19 @@ User message
               └── "FINISH"   ──> Return response
 ```
 
-- **LLM:** `ChatGoogleGenerativeAI(model="gemini-3-flash-preview", temperature=0)`
+- Router uses `llm.with_structured_output(RouteDecision)`; the supervisor node forwards the `RunnableConfig` so callbacks (e.g. the metrics handler) propagate into the router and specialist calls.
+- Each specialist node receives only the **last human message** (general also gets the last 6 messages, cleaned of orphaned tool calls), runs its own ReAct loop, and returns to the supervisor with only its final `AIMessage` appended.
+
+**Arm B — Monolithic ReAct (`build_monolithic_agent`)** — a single `create_react_agent` given the **union of every tool** (MCP + RAG) and one merged system prompt covering all three capability areas. No router, no inter-agent hops.
+
+- **LLM (both arms):** `ChatGoogleGenerativeAI(model="gemini-3-flash-preview", temperature=0)`
 - **Agent style:** `create_react_agent()` (ReAct loop)
-- **Context window:** last 6 messages passed to supervisor; intermediate tool calls stripped before passing to next agent
-- **Max recursion depth:** 8 supervisor hops
-- **Streaming:** `agent.astream_events()` (v2), emitting `data:` JSON lines for tool starts and final content
+- **Date injection:** both builders accept an injectable `today` (defaults to `date.today()`); the benchmark pins it to the dataset's `reference_date` for deterministic relative-date reasoning
+- **Context window:** last 6 messages passed to the supervisor router; intermediate tool calls stripped before passing to the next agent
+- **Max recursion depth:** `recursion_limit=8` in production (`chat_service`); the benchmark applies `recursion_limit=15` identically to both arms
+- **Streaming:** `agent.astream_events()` (v2), emitting `data:` JSON lines for tool starts and the final terminal answer (an `AIMessage` with no `tool_calls`)
+
+**Arm selection:** `ChatRequest.arch` (`"supervisor"` | `"monolithic"`, default `"supervisor"`) chooses the arm per request. The chat routes resolve it via `di_container_instance.get_agent(req.arch)`, which **fails loud** on an unknown arch rather than silently falling back (silent fallback would contaminate the architecture comparison).
 
 ### RAG Pipeline (`backend/app/services/embedding_service.py`)
 
@@ -221,7 +235,7 @@ A singleton `DIContainer` is initialised at startup and stores:
 - LLM client (Gemini)
 - MCP client (connected to `http://localhost:8000/mcp`)
 - Embeddings client
-- Compiled LangGraph agent
+- An **agent registry** — compiled graphs keyed by arch name (`"supervisor"`, `"monolithic"`). `register_agent(name, graph)` populates it; `get_agent(arch)` retrieves one (`DEFAULT_ARCH = "supervisor"`) and raises `ValueError` for an unregistered arch.
 
 ### Key Dependencies
 
@@ -245,6 +259,20 @@ Environment variables (read from parent `.env`):
 ```
 POSTGRE_USER · POSTGRE_PASS · POSTGRE_IP · POSTGRE_PORT · POSTGRE_DB_NAME
 ENVIRONMENT  (local | staging | production)
+GOOGLE_API_KEY                       # Gemini LLM + embeddings
+```
+
+**Pricing (thesis cost accounting)** — Gemini token prices per 1,000 tokens, surfaced on `Settings` and overridable via env:
+
+```
+PRICE_IN_PER_1K   (default 0.0005)   # input tokens
+PRICE_OUT_PER_1K  (default 0.003)    # output tokens
+```
+
+**Evaluation database (benchmark only)** — a SEPARATE `EVAL_POSTGRE_*` family that the eval seeder uses; the DB **name must contain `"eval"`** or the seeder refuses to touch it (see §4):
+
+```
+EVAL_POSTGRE_USER · EVAL_POSTGRE_PASS · EVAL_POSTGRE_IP · EVAL_POSTGRE_PORT · EVAL_POSTGRE_DB_NAME
 ```
 
 ---
@@ -309,6 +337,105 @@ POSTGRE_DB_NAME=life-tracker
 
 ---
 
+## 4. Evaluation & Benchmark Harness (Thesis)
+
+**Location:** `backend/app/evaluation/`
+**Stack:** Pydantic v2 · SQLModel · LangChain callbacks · pytest · matplotlib · SciPy · python-docx
+
+The evaluation layer runs the same golden dataset through **both architecture arms** (supervisor vs. monolithic), captures per-run efficiency and correctness metrics, optionally grades answer quality with an LLM judge, and renders a thesis-ready report. The research question it answers: *how does the management architecture affect tool-selection accuracy, argument-extraction correctness, and task-execution efficiency?*
+
+### Pipeline at a Glance
+
+```
+scenarios.yaml ──load+validate──> Dataset (loader.py)
+        │
+   for each (scenario × arch × repeat):
+        │  seed eval DB (seed.py) ──> index RAG files (embedding_service)
+        │  run agent with metrics (callbacks.run_with_metrics)
+        │  rule-based score (scorer.py)  ◀── PRIMARY evaluator
+        │  append one JSONL row (metrics.append_run_metrics)
+        │  teardown eval DB
+        ▼
+   results/runs.jsonl
+        │  optional --judge
+        ▼
+   judge.py (LLM-as-judge) ◀── SUPPLEMENTARY ──> results/runs_judged.jsonl
+        │                                        + blind manual_scoring.csv (+ key.csv)
+        ▼
+   analyze_results.py ──> results/analysis/{thesis_results.docx, figures/, *.csv}
+```
+
+### Golden Dataset (`dataset/`)
+
+- **`scenarios.yaml`** — 26 annotated scenarios across 5 categories: tracking (6), rag (5), multi_domain (5), ambiguous (5), general (5). Each scenario carries `setup` rows to seed, the user `message` (+ optional `history`), and an `expected` block that is **ground truth**.
+- **`loader.py`** — Pydantic v2 models (`Scenario`, `ExpectedOutcome`, `ToolCall`, `Dataset`, seed sub-models) plus a strict, fail-fast YAML loader. Validates: unique ids, every tool name ∈ the real MCP + RAG tool inventory (`KNOWN_TOOLS`), `clarification/confirmation ⇒ no_write_expected`, and general scenarios route to `general` with no tool calls.
+- **`DATE ANCHOR`** — all relative dates are pre-resolved against a fixed `reference_date` (`2026-06-03`, a Wednesday); the loader does no date arithmetic.
+- **`dataset/docs/`** — sample document text (`gym_membership.txt`, `nutrition_guidelines.txt`) backing the RAG scenarios.
+
+### Eval Database Seeding (`dataset/seed.py`) — safety-critical
+
+- Builds a **separate** SQLModel engine from the `EVAL_POSTGRE_*` vars; never reuses or falls back to the production engine.
+- **Hard guard:** `_assert_eval_database` refuses any DB whose name lacks the substring `"eval"`, raising `RuntimeError` before any write or teardown — the single line of defence against wiping production.
+- `seed_scenario` inserts expenses/workouts/files and returns `SeededIds` (UUIDs keyed by each row's `ref` handle); `teardown` deletes all eval rows in FK-safe order before and after every run.
+- ⚠️ **MCP caveat:** tool writes (`log_expense`, `delete_*`, …) flow through the MCP server, which reads its **own** `POSTGRE_*` vars. The MCP server process must be pointed at the **same** eval DB, or the agent's writes hit production while the seeder cleans eval, and `db_delta` will be wrong.
+
+### Metrics Capture (`callbacks.py`, `metrics.py`)
+
+- **`MetricsCallbackHandler`** (one per run, stateful) — a LangChain `AsyncCallbackHandler` that counts LLM calls (chat + the supervisor router's structured-output call), sums token usage defensively across provider field-name variants, records ordered `(tool_name, args)` pairs, approximates graph super-steps (`hops`) and the ordered `nodes_visited` (excluding plumbing nodes), and times TTFT.
+- **`run_with_metrics`** — invokes the graph once, merges the handler into a config copy (preserving the caller's `recursion_limit`), and captures a `GraphRecursionError` as **data** (`non_termination=True`) rather than propagating it, so a runaway router loop still counts with its partial metrics.
+- **`RunMetrics`** — framework-agnostic value object (latency, TTFT, LLM/tool counts, tokens, est. cost, hops, nodes, non-termination); `compute_cost` applies the `PRICE_*` settings; `append_run_metrics` writes one JSON line per run (append-only, sequential).
+
+### Rule-Based Scorer (`scorer.py`) — PRIMARY evaluator
+
+A **pure** module (no I/O, no LLM, no DB) that compares an annotated `Scenario` against observed tool calls / visited nodes / final answer / DB delta and returns a `ScoreResult`. `task_success` is the AND of every *applicable* (non-`None`) check; `None` always means "not applicable", never "failed". Checks include:
+
+| Check | Meaning |
+|-------|---------|
+| `route_correct` | Supervisor arm only — first specialist node entered matches the expected route (`None` for monolithic). |
+| `tool_selection_correct` | **Lenient subset** check: all expected tools were called; harmless extra *reads* tolerated. |
+| `args_extraction_ratio` / `_correct` | Per-parameter ground-truth arg match (numeric tolerance + case-folded strings); ratio + all-correct flag. |
+| `wrong_tool_called` | Flags only a forbidden tool or an **unexpected write/destructive** tool. |
+| `hallucination_free` | Conservative: write/destructive tool ran or DB mutated despite `no_write_expected`. |
+| `clarification_correct` / `unsafe_action_avoided` | Ambiguous scenarios: asked-a-question-without-writing / no destructive call before confirmation. |
+| `db_effect_correct` | Observed `db_delta` matches the annotated `*_added` / `*_unchanged` effect. |
+
+### LLM-as-Judge (`judge.py`) — SUPPLEMENTARY
+
+A secondary signal that **never** influences `task_success`. Blind-grades each final answer (1–5 on correctness, completeness, relevance, conciseness + a hallucination flag) against the reference answer + rubric points. Two layers of blindness: the grading prompt never sees the architecture, and the exported `manual_scoring.csv` is shuffled (fixed seed `1337`) with opaque `anon_id`s — architecture lives only in the separate `manual_scoring_key.csv`. Judge output is written under a `"quality"` key in `runs_judged.jsonl`; failures are non-fatal.
+
+### Benchmark Runner (`run_benchmark.py`)
+
+Headless entry point that sweeps every `(scenario, arch, repeat)`, resolving `<ref:NAME>` placeholders to real seeded UUIDs and tearing the DB down around each run. Pins agents' `today` to `reference_date` for reproducibility.
+
+```bash
+# from backend/, with venv active, MCP server running, and EVAL_POSTGRE_* + GOOGLE_API_KEY set
+python -m app.evaluation.run_benchmark --arch both --repeats 5
+python -m app.evaluation.run_benchmark --arch supervisor --limit 3 --repeats 1
+python -m app.evaluation.run_benchmark --arch both --repeats 5 --judge   # also run the judge
+```
+
+Flags: `--arch {supervisor,monolithic,both}` · `--repeats N` · `--dataset` · `--out` · `--limit N` (smoke runs) · `--resume` (skip already-scored rows) · `--judge` / `--no-judge` (default off).
+
+### Analysis & Reporting (`analyze_results.py`)
+
+Reads the frozen `results/runs_judged.jsonl` and renders `results/analysis/thesis_results.docx` (native tables + embedded figures) plus CSV backups. The design is **paired** (every scenario runs under both arms): continuous efficiency metrics use the **Wilcoxon signed-rank** test on per-scenario means; binary accuracy axes use **McNemar's exact** test on paired `(scenario, repeat)` outcomes. Produces grouped-bar / box-plot figures and a research-question narrative.
+
+```bash
+backend/venv/Scripts/python.exe app/evaluation/analyze_results.py
+```
+
+### Tests (`evaluation/tests/`)
+
+pytest unit tests covering the offline-testable modules: `test_callbacks.py`, `test_dataset.py`, `test_judge.py`, `test_metrics.py`, `test_scorer.py`.
+
+### Results Artifacts (`evaluation/results/`)
+
+`runs.jsonl` (raw scored runs) · `runs_judged.jsonl` (judge-enriched) · `manual_scoring.csv` + `manual_scoring_key.csv` (blind human-rater pair) · `run.log` · `analysis/` (Word report, `figures/`, CSVs).
+
+> **Note on dependencies:** `backend/requirements.txt` covers the *running app* only. The evaluation layer additionally needs `pyyaml`, `pytest`, `matplotlib`, `scipy`, and `python-docx`, which are installed in the backend venv but not pinned in `requirements.txt`.
+
+---
+
 ## Data Flow: End-to-End Chat Request
 
 ```
@@ -355,15 +482,29 @@ chat-with-ur-docs/
 │   │   │   ├── dependency_container.py   # Singleton DI container
 │   │   │   └── dependency_factory.py     # Builds LLM, MCP, agent at startup
 │   │   ├── services/
-│   │   │   ├── agents.py            # LangGraph supervisor + 3 agents
-│   │   │   ├── chat_service.py      # Request orchestration, file augmentation
+│   │   │   ├── agents.py            # build_graph (supervisor) + build_monolithic_agent
+│   │   │   ├── chat_service.py      # Request orchestration, file augmentation, SSE
 │   │   │   ├── embedding_service.py # PGVector init, chunk + embed, retrieval
 │   │   │   ├── extraction.py        # Per-type text extraction, receipt parsing
 │   │   │   ├── file_service.py      # Upload, store, process, delete files
 │   │   │   ├── expense_service.py   # Expense CRUD (SQLModel)
 │   │   │   └── exercise_service.py  # Exercise/session CRUD (SQLModel)
-│   │   └── tools/
-│   │       └── rag_tools.py         # LangChain Tool wrappers for document search
+│   │   ├── tools/
+│   │   │   └── rag_tools.py         # LangChain Tool wrappers for document search
+│   │   └── evaluation/              # Thesis benchmark harness (§4)
+│   │       ├── run_benchmark.py     # Headless sweep: scenario × arch × repeat
+│   │       ├── callbacks.py         # MetricsCallbackHandler, run_with_metrics
+│   │       ├── metrics.py           # RunMetrics, compute_cost, JSONL persistence
+│   │       ├── scorer.py            # Rule-based PRIMARY scorer (pure)
+│   │       ├── judge.py             # LLM-as-judge (SUPPLEMENTARY, blind)
+│   │       ├── analyze_results.py   # Stats + figures + thesis_results.docx
+│   │       ├── dataset/
+│   │       │   ├── loader.py        # Pydantic models + strict YAML loader
+│   │       │   ├── seed.py          # Eval DB seed/teardown (eval-name guard)
+│   │       │   ├── scenarios.yaml   # 26 annotated golden scenarios
+│   │       │   └── docs/            # Sample RAG documents
+│   │       ├── tests/               # pytest unit tests
+│   │       └── results/             # runs.jsonl, runs_judged.jsonl, analysis/
 │   └── uploads/                     # Uploaded file storage
 ├── mcp_server/
 │   ├── main.py                      # FastMCP server entry point

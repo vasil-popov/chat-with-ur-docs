@@ -1,10 +1,13 @@
 import base64
+import io
 import json
 import logging
 import os
 import re
 
 logger = logging.getLogger(__name__)
+
+MAX_IMAGE_DIM = 1600
 
 
 def _get_llm():
@@ -30,6 +33,24 @@ def _ocr_with_llm(image_bytes: bytes, mime: str, prompt: str) -> str:
     return str(content).strip()
 
 
+def _downscale_image(image_bytes: bytes, fallback_mime: str) -> tuple[bytes, str]:
+    from PIL import Image
+
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as img:
+            img = img.convert("RGB")
+            width, height = img.size
+            if max(width, height) > MAX_IMAGE_DIM:
+                scale = MAX_IMAGE_DIM / max(width, height)
+                img = img.resize((round(width * scale), round(height * scale)), Image.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=85)
+            return buf.getvalue(), "image/jpeg"
+    except Exception:
+        logger.warning("Image downscale failed; using original bytes", exc_info=True)
+        return image_bytes, fallback_mime
+
+
 def extract_text(file_path: str, file_type: str, mime_type: str) -> str:
     if file_type == "image":
         return _extract_image(file_path, mime_type)
@@ -46,9 +67,10 @@ def extract_text(file_path: str, file_type: str, mime_type: str) -> str:
 def _extract_image(path: str, mime_type: str) -> str:
     with open(path, "rb") as f:
         image_bytes = f.read()
+    img, mime = _downscale_image(image_bytes, mime_type)
     return _ocr_with_llm(
-        image_bytes,
-        mime_type,
+        img,
+        mime,
         "Extract all text from this image. If it is a receipt or invoice, include every line item, "
         "price, subtotal, tax, and total. Return only the extracted text, no commentary.",
     )
@@ -68,7 +90,10 @@ def _extract_pdf(path: str) -> str:
         pix = doc[0].get_pixmap(dpi=150)
         img_bytes = pix.tobytes("png")
         doc.close()
-        text = _ocr_with_llm(img_bytes, "image/png", "Extract all text from this scanned document page. Return only the extracted text.")
+        # Downscale + transcode to JPEG q85 to bound payload; fine for 150-dpi pages.
+        # If DPI is raised for better OCR, revisit the quality/size trade-off.
+        img, mime = _downscale_image(img_bytes, "image/png")
+        text = _ocr_with_llm(img, mime, "Extract all text from this scanned document page. Return only the extracted text.")
 
     return text
 

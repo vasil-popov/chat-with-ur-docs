@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.1.4:8069';
+const API_BASE_URL = 'http://192.168.1.8:8069';
 
 // ─── Chat ────────────────────────────────────────────────────────────────────
 
@@ -190,12 +190,32 @@ export const uploadFile = async (
   const form = new FormData();
   form.append('file', { uri, name, type: mimeType } as any);
   form.append('category', category);
-  const res = await fetch(`${API_BASE_URL}/api/files/upload`, {
-    method: 'POST',
-    body: form,
-  });
-  if (!res.ok) throw new Error('Failed to upload file');
-  return res.json();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/files/upload`, {
+      method: 'POST',
+      body: form,
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const detail = await res.text().then(
+        (text) => {
+          try { return JSON.parse(text).detail as string; } catch { return null; }
+        },
+        () => null
+      );
+      throw new Error(detail || `Upload failed (${res.status})`);
+    }
+    return res.json();
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Upload timed out');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const getFiles = async (category?: string): Promise<UploadedFile[]> => {

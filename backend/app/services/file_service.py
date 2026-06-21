@@ -90,7 +90,7 @@ async def upload_file(
 
     receipt_proposal = None
     try:
-        text = extraction.extract_text(file_path, file_type, mime_type)
+        text = await asyncio.to_thread(extraction.extract_text, file_path, file_type, mime_type)
         record.extracted_text = text
         record.is_receipt = extraction.is_receipt(text)
         record.status = "ready"
@@ -100,10 +100,10 @@ async def upload_file(
             from app.deps.dependency_container import di_container_instance
             llm = di_container_instance.llm_client
             if llm:
-                receipt_proposal = extraction.parse_receipt_items(text, llm)
+                receipt_proposal = await asyncio.to_thread(extraction.parse_receipt_items, text, llm)
 
         try:
-            embedding_service.embed_file(str(file_id), record.original_name, text)
+            await asyncio.to_thread(embedding_service.embed_file, str(file_id), record.original_name, text)
         except Exception as e:
             logger.warning("Embedding failed for %s: %s", file_id, e)
 

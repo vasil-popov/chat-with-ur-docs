@@ -35,7 +35,8 @@ for one of those, briefly let them know you'll hand it off to the appropriate sp
 
 Be concise, conversational, and accurate. Today's date: {today}."""
 
-MONOLITHIC_SYSTEM_PROMPT = """You are a single, capable personal assistant that handles everything yourself.
+MONOLITHIC_SYSTEM_PROMPT = """
+You are a single, capable personal assistant that handles everything yourself.
 
 You have three areas of capability, all available to you through the tools provided:
 
