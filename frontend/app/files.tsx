@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type ThemeColors } from '../src/theme';
 import { type ReceiptItem, type UploadedFile, deleteFile, getFiles, uploadFile } from '../src/api';
 import ReceiptProposalCard from '../src/components/ReceiptProposalCard';
+import ActionSheet from '../src/components/ActionSheet';
+import { alertMessage, confirmDestructive } from '../src/utils/alert';
 
 const CATEGORIES = ['all', 'general', 'receipt', 'document', 'spreadsheet', 'image'] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -53,22 +54,17 @@ export default function FilesScreen() {
     try {
       setFiles(await getFiles(activeCategory === 'all' ? undefined : activeCategory));
     } catch {
-      Alert.alert('Error', 'Could not load files.');
+      alertMessage('Error', 'Could not load files.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = (id: string, name: string) => {
-    Alert.alert('Delete file', `Delete "${name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive', onPress: async () => {
-          try { await deleteFile(id); fetchFiles(); }
-          catch { Alert.alert('Error', 'Failed to delete file.'); }
-        },
-      },
-    ]);
+    confirmDestructive('Delete file', `Delete "${name}"?`, 'Delete', async () => {
+      try { await deleteFile(id); fetchFiles(); }
+      catch { alertMessage('Error', 'Failed to delete file.'); }
+    });
   };
 
   const handleUploadResult = async (uri: string, name: string, mimeType: string) => {
@@ -79,8 +75,8 @@ export default function FilesScreen() {
       if (uploaded.is_receipt && uploaded.receipt_proposal?.length) {
         setReceiptProposal({ fileName: uploaded.original_name, items: uploaded.receipt_proposal });
       }
-    } catch {
-      Alert.alert('Error', 'Upload failed.');
+    } catch (err) {
+      alertMessage('Error', err instanceof Error ? err.message : 'Upload failed.');
     } finally {
       setUploading(false);
     }
@@ -102,7 +98,7 @@ export default function FilesScreen() {
   const pickImage = async () => {
     setShowActionSheet(false);
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') { Alert.alert('Permission needed', 'Allow photo library access.'); return; }
+    if (status !== 'granted') { alertMessage('Permission needed', 'Allow photo library access.'); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
@@ -116,7 +112,7 @@ export default function FilesScreen() {
   const openCamera = async () => {
     setShowActionSheet(false);
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') { Alert.alert('Permission needed', 'Allow camera access.'); return; }
+    if (status !== 'granted') { alertMessage('Permission needed', 'Allow camera access.'); return; }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
     if (result.canceled || !result.assets?.[0]) return;
     const asset = result.assets[0];
@@ -241,29 +237,16 @@ export default function FilesScreen() {
       )}
 
       {/* Action sheet overlay */}
-      {showActionSheet && (
-        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setShowActionSheet(false)}>
-          <View style={[styles.actionSheet, { backgroundColor: c.surface }]}>
-            <View style={[styles.sheetHandle, { backgroundColor: c.border }]} />
-            <Text style={[styles.actionSheetTitle, { color: c.text }]}>Add File</Text>
-            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.surfaceVariant }]} onPress={openCamera}>
-              <Ionicons name="camera-outline" size={20} color={c.accent} />
-              <Text style={[styles.sheetBtnText, { color: c.text }]}>Camera (receipt photo)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.surfaceVariant }]} onPress={pickImage}>
-              <Ionicons name="image-outline" size={20} color={c.accent} />
-              <Text style={[styles.sheetBtnText, { color: c.text }]}>Photo Library</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.surfaceVariant }]} onPress={pickDocument}>
-              <Ionicons name="folder-open-outline" size={20} color={c.accent} />
-              <Text style={[styles.sheetBtnText, { color: c.text }]}>Browse Files (PDF, TXT, Excel)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.sheetBtn, { backgroundColor: c.cancelBg }]} onPress={() => setShowActionSheet(false)}>
-              <Text style={[styles.sheetBtnText, { color: c.cancelText, textAlign: 'center' }]}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      )}
+      <ActionSheet
+        visible={showActionSheet}
+        title="Add File"
+        onCancel={() => setShowActionSheet(false)}
+        actions={[
+          { label: 'Camera (receipt photo)', icon: 'camera-outline', onPress: openCamera },
+          { label: 'Photo Library', icon: 'image-outline', onPress: pickImage },
+          { label: 'Browse Files (PDF, TXT, Excel)', icon: 'folder-open-outline', onPress: pickDocument },
+        ]}
+      />
 
       {/* FAB */}
       {uploading ? (
@@ -349,32 +332,6 @@ function makeStyles(c: ThemeColors) {
       gap: 6,
     },
     actionBtnText: { fontSize: 13, color: '#fff', fontWeight: '600' },
-
-    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-    actionSheet: {
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      padding: 16,
-      paddingBottom: 36,
-      gap: 10,
-    },
-    sheetHandle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-      alignSelf: 'center',
-      marginBottom: 12,
-    },
-    actionSheetTitle: { fontSize: 17, fontWeight: '700', textAlign: 'center', marginBottom: 6 },
-    sheetBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      borderRadius: 14,
-      gap: 12,
-    },
-    sheetBtnText: { fontSize: 15, fontWeight: '500', flex: 1 },
 
     fab: {
       position: 'absolute',

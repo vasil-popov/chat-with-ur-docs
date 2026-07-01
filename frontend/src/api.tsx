@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://192.168.1.8:8069';
+import { Platform } from 'react-native';
+
+const API_BASE_URL = 'http://192.168.1.6:8069';
 
 // ─── Chat ────────────────────────────────────────────────────────────────────
 
@@ -188,7 +190,13 @@ export const uploadFile = async (
   category = 'general'
 ): Promise<UploadedFile> => {
   const form = new FormData();
-  form.append('file', { uri, name, type: mimeType } as any);
+  if (Platform.OS === 'web') {
+    const raw = await fetch(uri).then((r) => r.blob());
+    const blob = raw.type ? raw : new Blob([raw], { type: mimeType });
+    form.append('file', blob, name);
+  } else {
+    form.append('file', { uri, name, type: mimeType } as any);
+  }
   form.append('category', category);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 120000);

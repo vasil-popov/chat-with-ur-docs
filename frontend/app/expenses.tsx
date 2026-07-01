@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type ThemeColors } from '../src/theme';
 import { type Expense, createExpense, deleteExpense, getExpenses, updateExpense } from '../src/api';
+import { alertMessage, confirmDestructive } from '../src/utils/alert';
 
 const today = new Date();
 const todayStr = today.toISOString().split('T')[0];
@@ -55,14 +55,16 @@ export default function ExpensesScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
 
-  useEffect(() => { fetchExpenses(); }, [startDate, endDate]);
+  // Fetch once on mount; subsequent refetches are triggered explicitly by the
+  // date inputs' onEndEditing (blur) and the refresh button — not on every keystroke.
+  useEffect(() => { fetchExpenses(); }, []);
 
   const fetchExpenses = async () => {
     setLoading(true);
     try {
       setExpenses(await getExpenses(startDate, endDate));
     } catch {
-      Alert.alert('Error', 'Could not load expenses. Is the backend running?');
+      alertMessage('Error', 'Could not load expenses. Is the backend running?');
     } finally {
       setLoading(false);
     }
@@ -80,11 +82,11 @@ export default function ExpensesScreen() {
 
   const handleSave = async () => {
     if (!form.amount || !form.category || !form.transaction_date) {
-      Alert.alert('Validation', 'Amount, category and date are required.'); return;
+      alertMessage('Validation', 'Amount, category and date are required.'); return;
     }
     const parsed = parseFloat(form.amount);
     if (isNaN(parsed) || parsed <= 0) {
-      Alert.alert('Validation', 'Amount must be a positive number.'); return;
+      alertMessage('Validation', 'Amount must be a positive number.'); return;
     }
     try {
       const payload = { amount: parsed, category: form.category.trim(), description: form.description.trim() || undefined, transaction_date: form.transaction_date };
@@ -93,18 +95,15 @@ export default function ExpensesScreen() {
       closeForm();
       fetchExpenses();
     } catch {
-      Alert.alert('Error', 'Failed to save expense.');
+      alertMessage('Error', 'Failed to save expense.');
     }
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete expense', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
-        try { await deleteExpense(id); fetchExpenses(); }
-        catch { Alert.alert('Error', 'Failed to delete expense.'); }
-      }},
-    ]);
+    confirmDestructive('Delete expense', 'Are you sure?', 'Delete', async () => {
+      try { await deleteExpense(id); fetchExpenses(); }
+      catch { alertMessage('Error', 'Failed to delete expense.'); }
+    });
   };
 
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -121,6 +120,7 @@ export default function ExpensesScreen() {
             value={startDate}
             onChangeText={setStartDate}
             onEndEditing={fetchExpenses}
+            onBlur={fetchExpenses}
             placeholder="YYYY-MM-DD"
             placeholderTextColor={c.placeholder}
           />
@@ -130,6 +130,7 @@ export default function ExpensesScreen() {
             value={endDate}
             onChangeText={setEndDate}
             onEndEditing={fetchExpenses}
+            onBlur={fetchExpenses}
             placeholder="YYYY-MM-DD"
             placeholderTextColor={c.placeholder}
           />

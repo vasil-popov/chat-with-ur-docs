@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -21,6 +20,8 @@ import { sendChatMessageStream, uploadFile, type ReceiptItem } from '../src/api'
 import { useTheme, type ThemeColors } from '../src/theme';
 import FileContextBar from '../src/components/FileContextBar';
 import ReceiptProposalCard from '../src/components/ReceiptProposalCard';
+import ActionSheet from '../src/components/ActionSheet';
+import { alertMessage } from '../src/utils/alert';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -44,6 +45,7 @@ export default function ChatScreen() {
   const [activeFileIds, setActiveFileIds] = useState<string[]>([]);
   const [activeFileNames, setActiveFileNames] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [showAttachSheet, setShowAttachSheet] = useState(false);
 
   useEffect(() => {
     if (params.fileId && !activeFileIds.includes(params.fileId)) {
@@ -86,14 +88,7 @@ export default function ChatScreen() {
     );
   };
 
-  const handleAttach = () => {
-    Alert.alert('Attach file', 'Choose source', [
-      { text: 'Camera', onPress: attachFromCamera },
-      { text: 'Photo Library', onPress: attachFromLibrary },
-      { text: 'Browse Files', onPress: attachDocument },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
+  const handleAttach = () => setShowAttachSheet(true);
 
   const _upload = async (uri: string, name: string, mimeType: string) => {
     setUploading(true);
@@ -110,16 +105,17 @@ export default function ChatScreen() {
         };
         setMessages((prev) => [...prev, proposalMsg]);
       }
-    } catch {
-      Alert.alert('Error', 'Upload failed.');
+    } catch (err) {
+      alertMessage('Error', err instanceof Error ? err.message : 'Upload failed.');
     } finally {
       setUploading(false);
     }
   };
 
   const attachFromCamera = async () => {
+    setShowAttachSheet(false);
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') { Alert.alert('Permission needed', 'Allow camera access.'); return; }
+    if (status !== 'granted') { alertMessage('Permission needed', 'Allow camera access.'); return; }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
     if (result.canceled || !result.assets?.[0]) return;
     const a = result.assets[0];
@@ -127,8 +123,9 @@ export default function ChatScreen() {
   };
 
   const attachFromLibrary = async () => {
+    setShowAttachSheet(false);
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') { Alert.alert('Permission needed', 'Allow photo library access.'); return; }
+    if (status !== 'granted') { alertMessage('Permission needed', 'Allow photo library access.'); return; }
     const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.8 });
     if (result.canceled || !result.assets?.[0]) return;
     const a = result.assets[0];
@@ -136,6 +133,7 @@ export default function ChatScreen() {
   };
 
   const attachDocument = async () => {
+    setShowAttachSheet(false);
     const result = await DocumentPicker.getDocumentAsync({
       type: ['application/pdf', 'text/plain',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -266,6 +264,17 @@ export default function ChatScreen() {
             <Ionicons name="arrow-up" size={20} color={canSend ? '#ffffff' : c.textFaint} />
           </TouchableOpacity>
         </View>
+
+        <ActionSheet
+          visible={showAttachSheet}
+          title="Attach file"
+          onCancel={() => setShowAttachSheet(false)}
+          actions={[
+            { label: 'Camera', icon: 'camera-outline', onPress: attachFromCamera },
+            { label: 'Photo Library', icon: 'image-outline', onPress: attachFromLibrary },
+            { label: 'Browse Files', icon: 'folder-open-outline', onPress: attachDocument },
+          ]}
+        />
 
       </SafeAreaView>
     </KeyboardAvoidingView>

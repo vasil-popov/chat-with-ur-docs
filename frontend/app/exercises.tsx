@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type ThemeColors } from '../src/theme';
 import { type ExerciseEntry, type WorkoutSession, createExercise, deleteExercise, getWorkouts } from '../src/api';
+import { alertMessage, confirmDestructive } from '../src/utils/alert';
 
 const today = new Date();
 const todayStr = today.toISOString().split('T')[0];
@@ -52,7 +52,9 @@ export default function ExercisesScreen() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm());
 
-  useEffect(() => { fetchWorkouts(); }, [startDate, endDate]);
+  // Fetch once on mount; subsequent refetches are triggered explicitly by the
+  // date inputs' onEndEditing (blur) and the refresh button — not on every keystroke.
+  useEffect(() => { fetchWorkouts(); }, []);
 
   const fetchWorkouts = async () => {
     setLoading(true);
@@ -61,7 +63,7 @@ export default function ExercisesScreen() {
       setWorkouts(data);
       setExpanded(new Set(data.map((ws) => ws.session_id)));
     } catch {
-      Alert.alert('Error', 'Could not load workouts. Is the backend running?');
+      alertMessage('Error', 'Could not load workouts. Is the backend running?');
     } finally {
       setLoading(false);
     }
@@ -74,18 +76,15 @@ export default function ExercisesScreen() {
   });
 
   const handleDelete = (id: string, name: string) => {
-    Alert.alert('Delete exercise', `Delete "${name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
-        try { await deleteExercise(id); fetchWorkouts(); }
-        catch { Alert.alert('Error', 'Failed to delete exercise.'); }
-      }},
-    ]);
+    confirmDestructive('Delete exercise', `Delete "${name}"?`, 'Delete', async () => {
+      try { await deleteExercise(id); fetchWorkouts(); }
+      catch { alertMessage('Error', 'Failed to delete exercise.'); }
+    });
   };
 
   const handleSave = async () => {
     if (!form.exercise_name || !form.category || !form.workout_date) {
-      Alert.alert('Validation', 'Exercise name, category and date are required.'); return;
+      alertMessage('Validation', 'Exercise name, category and date are required.'); return;
     }
     try {
       await createExercise({
@@ -103,7 +102,7 @@ export default function ExercisesScreen() {
       setForm(emptyForm());
       fetchWorkouts();
     } catch {
-      Alert.alert('Error', 'Failed to save exercise.');
+      alertMessage('Error', 'Failed to save exercise.');
     }
   };
 
@@ -121,6 +120,7 @@ export default function ExercisesScreen() {
             value={startDate}
             onChangeText={setStartDate}
             onEndEditing={fetchWorkouts}
+            onBlur={fetchWorkouts}
             placeholder="YYYY-MM-DD"
             placeholderTextColor={c.placeholder}
           />
@@ -130,6 +130,7 @@ export default function ExercisesScreen() {
             value={endDate}
             onChangeText={setEndDate}
             onEndEditing={fetchWorkouts}
+            onBlur={fetchWorkouts}
             placeholder="YYYY-MM-DD"
             placeholderTextColor={c.placeholder}
           />
